@@ -1,24 +1,23 @@
-import { auth } from '@/auth'
+import NextAuth from 'next-auth'
+import { authConfig } from '@/auth.config'
 import { NextResponse } from 'next/server'
+
+const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
   const session = req.auth
 
-  // Redirect unauthenticated users to login
   if (!session) {
-    const loginUrl = new URL('/login', req.url)
-    return NextResponse.redirect(loginUrl)
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
   const role = session.user.role
 
-  // Admin-only routes
   if (pathname.startsWith('/admin') && role !== 'Admin') {
     return NextResponse.redirect(new URL('/information-book', req.url))
   }
 
-  // Profile page not available for Admin
   if (pathname.startsWith('/profile') && role === 'Admin') {
     return NextResponse.redirect(new URL('/information-book', req.url))
   }
@@ -27,7 +26,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: [
-    '/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)'],
 }
