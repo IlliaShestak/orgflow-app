@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #0A3D91;
+  --color-brand-blue-soft: #4472CA;
+  --color-brand-blue-tint: #E8EDF8;
+  --color-brand-orange: #E85D04;
+  --color-brand-orange-soft: #F4845F;
+  --color-brand-orange-tint: #FDF0E8;
+  --color-brand-green: #0B7B45;
+  --color-brand-green-soft: #3CB371;
+  --color-brand-green-tint: #E6F5EE;
+  --color-brand-sidebar: #1A1D2E;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background: #F7F8FA;
+  color: #171717;
+  font-family: var(--font-sans);
+}
