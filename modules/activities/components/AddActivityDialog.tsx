@@ -41,7 +41,7 @@ export function AddActivityDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button className="bg-[#E85D04] hover:bg-[#F4845F] text-white rounded-[7px] px-[14px] py-[7px] text-xs font-semibold h-auto">
           + Р”РѕРґР°С‚Рё Р·Р°С…С–Рґ
         </Button>

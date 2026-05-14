@@ -77,6 +77,17 @@ export async function getMemberByUserId(userId: string) {
     include: {
       mentor: { select: { id: true, firstName: true, lastName: true } },
       mentees: { select: { id: true, firstName: true, lastName: true, status: true } },
+      teamMemberships: {
+        include: {
+          position: {
+            include: { team: { select: { id: true, name: true, type: true } } },
+          },
+        },
+        orderBy: { startDate: 'desc' },
+      },
+      applicationHistory: {
+        orderBy: { appliedAt: 'desc' },
+      },
     },
   })
 }

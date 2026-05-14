@@ -55,7 +55,7 @@ export function AttendancePanel({ activityId, attendance, availableMembers }: At
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
+        <Select value={selectedMemberId} onValueChange={(val) => setSelectedMemberId(val ?? '')}>
           <SelectTrigger className="flex-1 h-9 text-sm">
             <SelectValue placeholder="Оберіть учасника..." />
           </SelectTrigger>
