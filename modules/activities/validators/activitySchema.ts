@@ -1,5 +1,5 @@
 ﻿import { z } from 'zod'
-import { ActivityType } from '@prisma/client'
+import { ActivityType } from '@/generated/prisma'
 
 export const activityCreateSchema = z.object({
   type: z.nativeEnum(ActivityType),

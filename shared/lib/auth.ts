@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { Role } from '@prisma/client'
+import { Role } from '@/generated/prisma'
 
 export async function requireRole(...roles: Role[]): Promise<void> {
   const session = await auth()
