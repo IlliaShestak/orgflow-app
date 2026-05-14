@@ -1,10 +1,8 @@
 import 'dotenv/config'
-import { PrismaClient } from '../generated/prisma'
+import { PrismaClient } from '@prisma/client'
 import { PrismaNeonHttp } from '@prisma/adapter-neon'
-import { neon } from '@neondatabase/serverless'
 
-const sql = neon(process.env.DATABASE_URL!)
-const adapter = new PrismaNeonHttp(sql)
+const adapter = new PrismaNeonHttp(process.env.DATABASE_URL!, {})
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
