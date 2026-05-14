@@ -7,6 +7,9 @@ import { MemberAvatar } from '@/shared/components/MemberAvatar'
 import { MemberEditDialog } from '@/modules/hr/components/MemberEditDialog'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { formatDate } from '@/shared/lib/utils'
+import { getKspzTableByStatus } from '@/modules/knowledge/repository/kspzTableRepository'
+import { getCoverageForMember } from '@/modules/knowledge/repository/kspzCoverageRepository'
+import { MemberKspzGrid } from '@/modules/knowledge/components/MemberKspzGrid'
 
 interface PageProps {
   searchParams: Promise<{ tab?: string }>
@@ -32,6 +35,16 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       />
     )
   }
+
+  const [kspzTable, memberCoverage] = await Promise.all([
+    getKspzTableByStatus(member.status),
+    getKspzTableByStatus(member.status).then((t) =>
+      t ? getCoverageForMember(member.id, t.id) : []
+    ),
+  ])
+
+  const role = session.user.role
+  const canEdit = role === 'VP4HR'
 
   const tabs = [
     { key: 'info', label: 'Загальна інформація' },
@@ -139,7 +152,24 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       {tab === 'kspz' && (
         <div className="bg-white border border-gray-100 rounded-[10px] p-6">
           <h2 className="text-sm font-semibold text-gray-800 mb-4">КСПЗ</h2>
-          <p className="text-sm text-gray-400">Покриття знань буде додано в наступній версії</p>
+          {!kspzTable ? (
+            <p className="text-sm text-gray-400">
+              Таблиця знань для статусу {member.status} ще не створена
+            </p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-[11px] text-gray-400 mb-3">
+                Таблиця: <span className="font-medium text-gray-600">{kspzTable.name}</span>
+              </p>
+              <MemberKspzGrid
+                memberId={member.id}
+                topics={kspzTable.topics}
+                columns={kspzTable.columns}
+                coverage={memberCoverage}
+                canEdit={canEdit}
+              />
+            </div>
+          )}
         </div>
       )}
 

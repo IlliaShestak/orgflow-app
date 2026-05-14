@@ -62,6 +62,23 @@ export function Sidebar({ role, userName }: SidebarProps) {
           )
         })}
 
+        {(role === 'VP4HR' || role === 'FullMember') && (
+          <Link
+            href="/profile"
+            className={cn(
+              'flex items-center gap-2.5 px-3 py-2 rounded-[7px] text-[13px] transition-colors relative',
+              pathname.startsWith('/profile')
+                ? 'bg-white/10 text-white font-medium'
+                : 'text-white/55 hover:bg-white/6 hover:text-white/85'
+            )}
+          >
+            {pathname.startsWith('/profile') && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#E85D04] rounded-r-full" />
+            )}
+            Профіль
+          </Link>
+        )}
+
         {role === 'Admin' && (
           <>
             <p className="text-[9px] font-semibold tracking-[1.2px] uppercase text-white/25 px-2 mt-4 mb-2">
