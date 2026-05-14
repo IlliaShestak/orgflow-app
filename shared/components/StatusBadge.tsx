@@ -1,5 +1,5 @@
 import { cn } from '@/shared/lib/utils'
-import { MemberStatus } from '@prisma/client'
+import { MemberStatus } from '@/generated/prisma'
 
 const statusConfig: Record<MemberStatus, { label: string; className: string }> = {
   Observer: { label: 'Observer', className: 'bg-[#E8EDF8] text-[#0A3D91]' },

@@ -9,7 +9,7 @@ import { AddMemberDialog } from '@/modules/hr/components/AddMemberDialog'
 import { ViewToggle } from '@/modules/hr/components/ViewToggle'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import { MemberStatus, MemberState } from '@prisma/client'
+import { MemberStatus, MemberState } from '@/generated/prisma'
 
 interface PageProps {
   searchParams: Promise<{ view?: string; search?: string; status?: string; state?: string }>
