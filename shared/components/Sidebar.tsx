@@ -115,17 +115,6 @@ export function Sidebar({ role, userName }: SidebarProps) {
             <p className="text-white/35 text-[10px] truncate">{role}</p>
           </div>
         </div>
-        <Link
-          href="/settings"
-          className={cn(
-            'flex items-center gap-2.5 px-3 py-1.5 rounded-[7px] text-[12px] transition-colors relative',
-            pathname.startsWith('/settings')
-              ? 'bg-white/10 text-white font-medium'
-              : 'text-white/40 hover:bg-white/6 hover:text-white/70'
-          )}
-        >
-          Змінити пароль
-        </Link>
       </div>
     </aside>
   )
