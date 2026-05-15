@@ -18,7 +18,9 @@ const ROLES = [
 
 export function UserForm({ members, onSuccess, onCancel }: UserFormProps) {
   const [error, setError] = useState<string | null>(null)
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [copied, setCopied] = useState(false)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -28,10 +30,49 @@ export function UserForm({ members, onSuccess, onCancel }: UserFormProps) {
       const result = await createUser(formData)
       if (result?.error) {
         setError(result.error)
-      } else {
-        onSuccess()
+      } else if (result?.generatedPassword) {
+        setGeneratedPassword(result.generatedPassword)
       }
     })
+  }
+
+  function handleCopy() {
+    if (!generatedPassword) return
+    navigator.clipboard.writeText(generatedPassword)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (generatedPassword) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-[8px] bg-[#E6F5EE] border border-[#0B7B45]/20 p-4">
+          <p className="text-[12px] font-semibold text-[#0B7B45] mb-1">Користувача створено</p>
+          <p className="text-[11px] text-gray-600 mb-3">
+            Збережіть цей пароль і передайте користувачу. Після зміни пароля він більше не буде доступний.
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 bg-white border border-gray-200 rounded-[6px] px-3 py-2 text-[13px] font-mono text-gray-800 select-all">
+              {generatedPassword}
+            </code>
+            <button
+              onClick={handleCopy}
+              className="px-3 py-2 text-[11px] font-medium text-white bg-[#0B7B45] hover:bg-[#3CB371] rounded-[7px] transition-colors whitespace-nowrap"
+            >
+              {copied ? 'Скопійовано!' : 'Копіювати'}
+            </button>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={onSuccess}
+            className="px-4 py-2 text-xs font-semibold text-white bg-[#E85D04] hover:bg-[#F4845F] rounded-[7px] transition-colors"
+          >
+            Готово
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -66,13 +107,13 @@ export function UserForm({ members, onSuccess, onCancel }: UserFormProps) {
 
       <div>
         <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-[0.5px] mb-1">
-          Прив&apos;язати до учасника (необов&apos;язково)
+          {"Прив'язати до учасника (необов'язково)"}
         </label>
         <select
           name="memberId"
           className="w-full border border-gray-200 rounded-[7px] px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:border-[#E85D04] transition-colors"
         >
-          <option value="">— без прив&apos;язки —</option>
+          <option value="">{"— без прив'язки —"}</option>
           {members.map(m => (
             <option key={m.id} value={m.id}>{m.lastName} {m.firstName}</option>
           ))}

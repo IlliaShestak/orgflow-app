@@ -11,6 +11,7 @@ const breadcrumbMap: Record<string, string> = {
   knowledge: 'КСПЗ',
   profile: 'Профіль',
   admin: 'Адмін',
+  settings: 'Налаштування',
 }
 
 interface TopBarProps {

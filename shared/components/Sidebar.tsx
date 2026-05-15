@@ -104,7 +104,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
 
       {/* User card */}
       <div className="px-3 py-4 border-t border-white/8">
-        <div className="flex items-center gap-2.5 px-2">
+        <div className="flex items-center gap-2.5 px-2 mb-3">
           <div className="w-7 h-7 rounded-full bg-[#E85D04] flex items-center justify-center flex-shrink-0">
             <span className="text-white text-[11px] font-semibold">
               {userName.slice(0, 2).toUpperCase()}
@@ -115,6 +115,17 @@ export function Sidebar({ role, userName }: SidebarProps) {
             <p className="text-white/35 text-[10px] truncate">{role}</p>
           </div>
         </div>
+        <Link
+          href="/settings"
+          className={cn(
+            'flex items-center gap-2.5 px-3 py-1.5 rounded-[7px] text-[12px] transition-colors relative',
+            pathname.startsWith('/settings')
+              ? 'bg-white/10 text-white font-medium'
+              : 'text-white/40 hover:bg-white/6 hover:text-white/70'
+          )}
+        >
+          Змінити пароль
+        </Link>
       </div>
     </aside>
   )

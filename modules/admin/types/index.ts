@@ -4,6 +4,7 @@ export type UserWithMember = {
   id: string
   email: string
   role: Role
+  generatedPassword: string | null
   createdAt: Date
   member: {
     id: string

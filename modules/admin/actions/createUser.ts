@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
@@ -23,17 +23,17 @@ export async function createUser(formData: FormData) {
   }
 
   try {
-    await createUserInDb({
+    const { generatedPassword } = await createUserInDb({
       email: parsed.data.email,
       role: parsed.data.role as Role,
       memberId: parsed.data.memberId,
     })
     revalidatePath('/admin/users')
-    return { success: true }
+    return { success: true, generatedPassword }
   } catch (e: unknown) {
     if (e instanceof Error && e.message.includes('Unique constraint')) {
-      return { error: 'РљРѕСЂРёСЃС‚СѓРІР°С‡ Р· С‚Р°РєРёРј email РІР¶Рµ С–СЃРЅСѓС”' }
+      return { error: 'Користувач з таким email вже існує' }
     }
-    return { error: 'РџРѕРјРёР»РєР° РїСЂРё СЃС‚РІРѕСЂРµРЅРЅС– РєРѕСЂРёСЃС‚СѓРІР°С‡Р°' }
+    return { error: 'Помилка при створенні користувача' }
   }
 }

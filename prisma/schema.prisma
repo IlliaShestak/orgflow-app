@@ -66,9 +66,11 @@ model User {
   name          String?
   emailVerified DateTime? @map("email_verified")
   image         String?
-  role          Role      @default(FullMember)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  member        Member?
+  role              Role      @default(FullMember)
+  passwordHash      String?   @map("password_hash")
+  generatedPassword String?   @map("generated_password")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  member            Member?
   sessions      Session[]
   accounts      Account[]
   @@map("users")

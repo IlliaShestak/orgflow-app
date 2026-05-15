@@ -28,6 +28,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [showPassword, setShowPassword] = useState(false)
 
   function handleRoleChange() {
     setError(null)
@@ -54,7 +55,23 @@ export function UserTableRow({ user }: UserTableRowProps) {
   return (
     <>
       <tr className="border-b border-gray-100 hover:bg-[#FAFBFD] transition-colors">
-        <td className="px-4 py-3 text-[13px] text-gray-800">{user.email}</td>
+        <td className="px-4 py-3">
+          <p className="text-[13px] text-gray-800">{user.email}</p>
+          {user.generatedPassword && (
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] text-amber-600 font-medium">Тимчасовий пароль:</span>
+              <code className="text-[11px] font-mono text-gray-600">
+                {showPassword ? user.generatedPassword : '••••••••••'}
+              </code>
+              <button
+                onClick={() => setShowPassword(v => !v)}
+                className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? 'Сховати' : 'Показати'}
+              </button>
+            </div>
+          )}
+        </td>
         <td className="px-4 py-3 text-[13px] text-gray-600">
           {user.member ? `${user.member.lastName} ${user.member.firstName}` : '—'}
         </td>

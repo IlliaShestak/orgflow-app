@@ -42,10 +42,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: parsed.data.email },
         })
 
-        if (!user) return null
+        if (!user || !user.passwordHash) return null
 
-        // Password-less auth for now — email lookup only
-        // In production, compare hashed password
+        const { compare } = await import('bcryptjs')
+        const valid = await compare(parsed.data.password, user.passwordHash)
+        if (!valid) return null
+
         return {
           id: user.id,
           email: user.email,

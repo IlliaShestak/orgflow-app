@@ -1,6 +1,12 @@
-﻿import { prisma } from '@/shared/lib/prisma'
+import { prisma } from '@/shared/lib/prisma'
 import { Role } from '@prisma/client'
+import { hash } from 'bcryptjs'
 import { UserWithMember, MemberForSelect } from '../types'
+
+function generatePassword(): string {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+  return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+}
 
 export async function getUserList(): Promise<UserWithMember[]> {
   return prisma.user.findMany({
@@ -8,6 +14,7 @@ export async function getUserList(): Promise<UserWithMember[]> {
       id: true,
       email: true,
       role: true,
+      generatedPassword: true,
       createdAt: true,
       member: {
         select: {
@@ -25,11 +32,16 @@ export async function createUser(data: {
   email: string
   role: Role
   memberId?: string
-}): Promise<void> {
+}): Promise<{ generatedPassword: string }> {
+  const plainPassword = generatePassword()
+  const passwordHash = await hash(plainPassword, 10)
+
   const user = await prisma.user.create({
     data: {
       email: data.email,
       role: data.role,
+      passwordHash,
+      generatedPassword: plainPassword,
     },
   })
 
@@ -39,6 +51,8 @@ export async function createUser(data: {
       data: { userId: user.id },
     })
   }
+
+  return { generatedPassword: plainPassword }
 }
 
 export async function updateUserRole(userId: string, role: Role): Promise<void> {
@@ -49,7 +63,6 @@ export async function updateUserRole(userId: string, role: Role): Promise<void> 
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-  // Unlink member before deleting user
   await prisma.member.updateMany({
     where: { userId },
     data: { userId: null },
