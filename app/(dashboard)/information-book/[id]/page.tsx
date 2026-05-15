@@ -175,7 +175,6 @@ export default async function MemberProfilePage({ params, searchParams }: PagePr
               <MemberKspzGrid
                 memberId={id}
                 topics={kspzTable.topics}
-                columns={kspzTable.columns}
                 coverage={memberCoverage}
                 canEdit={canEdit}
               />

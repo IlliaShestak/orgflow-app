@@ -18,7 +18,10 @@ export async function getKspzTableById(id: string) {
   return prisma.knowledgeTable.findUnique({
     where: { id },
     include: {
-      topics: { orderBy: { order: 'asc' } },
+      topics: {
+        orderBy: { order: 'asc' },
+        include: { transferTypes: { select: { knowledgeTransferTypeId: true } } },
+      },
       columns: {
         include: {
           knowledgeTransferType: { select: { id: true, name: true } },
@@ -32,7 +35,10 @@ export async function getKspzTableByStatus(status: MemberStatus) {
   return prisma.knowledgeTable.findFirst({
     where: { targetStatus: status },
     include: {
-      topics: { orderBy: { order: 'asc' } },
+      topics: {
+        orderBy: { order: 'asc' },
+        include: { transferTypes: { select: { knowledgeTransferTypeId: true } } },
+      },
       columns: {
         include: {
           knowledgeTransferType: { select: { id: true, name: true } },

@@ -76,11 +76,16 @@ describe('createKspzTopic', () => {
     const mockTopic = { id: 'topic-1', name: 'Тема', knowledgeTableId: 'table-1', order: 3 }
     mockTopicCreate.mockResolvedValueOnce(mockTopic as never)
 
-    const result = await createKspzTopic({ knowledgeTableId: 'table-1', name: 'Тема' })
+    const result = await createKspzTopic({ knowledgeTableId: 'table-1', name: 'Тема', transferTypeIds: ['tt-1'] })
 
     expect(result).toEqual({ success: true, data: mockTopic })
     expect(mockTopicCreate).toHaveBeenCalledWith({
-      data: { knowledgeTableId: 'table-1', name: 'Тема', order: 3 },
+      data: {
+        knowledgeTableId: 'table-1',
+        name: 'Тема',
+        order: 3,
+        transferTypes: { create: [{ knowledgeTransferTypeId: 'tt-1' }] },
+      },
     })
   })
 
@@ -90,11 +95,16 @@ describe('createKspzTopic', () => {
     const mockTopic = { id: 'topic-1', name: 'Перша тема', knowledgeTableId: 'table-1', order: 0 }
     mockTopicCreate.mockResolvedValueOnce(mockTopic as never)
 
-    const result = await createKspzTopic({ knowledgeTableId: 'table-1', name: 'Перша тема' })
+    const result = await createKspzTopic({ knowledgeTableId: 'table-1', name: 'Перша тема', transferTypeIds: [] })
 
     expect(result).toEqual({ success: true, data: mockTopic })
     expect(mockTopicCreate).toHaveBeenCalledWith({
-      data: { knowledgeTableId: 'table-1', name: 'Перша тема', order: 0 },
+      data: {
+        knowledgeTableId: 'table-1',
+        name: 'Перша тема',
+        order: 0,
+        transferTypes: { create: [] },
+      },
     })
   })
 })

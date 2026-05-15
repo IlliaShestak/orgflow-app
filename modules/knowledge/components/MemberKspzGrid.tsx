@@ -2,48 +2,34 @@
 
 import { useTransition } from 'react'
 import { toggleKspzCoverage } from '../actions/kspzActions'
-import type { KspzTopic, KspzTableColumn } from '../types'
+import type { KspzTopic } from '../types'
 
 interface CoverageRecord {
   knowledgeTopicId: string
-  knowledgeTransferTypeId: string
   coveredAt: Date | null
 }
 
 interface MemberKspzGridProps {
   memberId: string
   topics: KspzTopic[]
-  columns: KspzTableColumn[]
   coverage: CoverageRecord[]
   canEdit: boolean
 }
 
-export function MemberKspzGrid({ memberId, topics, columns, coverage, canEdit }: MemberKspzGridProps) {
+export function MemberKspzGrid({ memberId, topics, coverage, canEdit }: MemberKspzGridProps) {
   const [isPending, startTransition] = useTransition()
 
-  const coverageSet = new Set(
-    coverage.map((c) => `${c.knowledgeTopicId}:${c.knowledgeTransferTypeId}`)
-  )
+  const coveredTopicIds = new Set(coverage.map((c) => c.knowledgeTopicId))
 
-  function isCovered(topicId: string, transferTypeId: string) {
-    return coverageSet.has(`${topicId}:${transferTypeId}`)
-  }
-
-  function handleToggle(topicId: string, transferTypeId: string, currentlyCovered: boolean) {
+  function handleToggle(topicId: string, currentlyCovered: boolean) {
     if (!canEdit) return
     startTransition(async () => {
-      await toggleKspzCoverage({
-        memberId,
-        knowledgeTopicId: topicId,
-        knowledgeTransferTypeId: transferTypeId,
-        covered: !currentlyCovered,
-      })
+      await toggleKspzCoverage({ memberId, knowledgeTopicId: topicId, covered: !currentlyCovered })
     })
   }
 
-  const totalCells = topics.length * columns.length
-  const coveredCount = coverage.length
-  const pct = totalCells > 0 ? Math.round((coveredCount / totalCells) * 100) : 0
+  const coveredCount = topics.filter((t) => coveredTopicIds.has(t.id)).length
+  const pct = topics.length > 0 ? Math.round((coveredCount / topics.length) * 100) : 0
 
   if (topics.length === 0) {
     return <p className="text-xs text-gray-400">Теми ще не додані до таблиці</p>
@@ -59,54 +45,33 @@ export function MemberKspzGrid({ memberId, topics, columns, coverage, canEdit }:
         <span className="text-[11px] text-gray-400 shrink-0">{pct}% покрито</span>
       </div>
 
-      {/* Grid */}
-      <div className="overflow-x-auto">
-        <table className="text-xs border-collapse w-full">
-          <thead>
-            <tr className="bg-[#F7F8FA]">
-              <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400 min-w-[180px]">
-                Тема
-              </th>
-              {columns.map((col) => (
-                <th
-                  key={col.knowledgeTransferTypeId}
-                  className="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 tracking-[0.8px] uppercase min-w-[80px]"
-                >
-                  {col.knowledgeTransferType.name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {topics.map((topic) => (
-              <tr key={topic.id} className="border-t border-gray-100 hover:bg-[#FAFBFD]">
-                <td className="px-3 py-2 text-sm text-gray-800">{topic.name}</td>
-                {columns.map((col) => {
-                  const covered = isCovered(topic.id, col.knowledgeTransferTypeId)
-                  return (
-                    <td key={col.knowledgeTransferTypeId} className="px-3 py-2 text-center">
-                      <button
-                        onClick={() => handleToggle(topic.id, col.knowledgeTransferTypeId, covered)}
-                        disabled={!canEdit || isPending}
-                        className={`w-6 h-6 rounded-[4px] flex items-center justify-center mx-auto transition-colors ${
-                          covered
-                            ? 'bg-[#3CB371] text-white'
-                            : 'bg-gray-100 text-gray-300 hover:bg-gray-200'
-                        } ${!canEdit ? 'cursor-default' : 'cursor-pointer'}`}
-                      >
-                        {covered && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
-                      </button>
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Topic list */}
+      <div className="space-y-1">
+        {topics.map((topic, i) => {
+          const covered = coveredTopicIds.has(topic.id)
+          return (
+            <div key={topic.id} className="flex items-center gap-3 px-3 py-2 bg-[#F7F8FA] rounded-[8px]">
+              <span className="text-[11px] text-gray-400 w-5 shrink-0">{i + 1}</span>
+              <span className="flex-1 text-sm text-gray-800 min-w-0">{topic.name}</span>
+              <button
+                onClick={() => handleToggle(topic.id, covered)}
+                disabled={!canEdit || isPending}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] text-[11px] font-medium transition-colors shrink-0 ${
+                  covered
+                    ? 'bg-[#3CB371] text-white'
+                    : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+                } ${!canEdit ? 'cursor-default' : 'cursor-pointer'} disabled:opacity-60`}
+              >
+                {covered && (
+                  <svg width="9" height="9" viewBox="0 0 10 10" fill="none" className="shrink-0">
+                    <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+                {covered ? 'Покрито' : 'Не покрито'}
+              </button>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

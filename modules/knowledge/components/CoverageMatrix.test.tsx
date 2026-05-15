@@ -7,25 +7,12 @@ vi.mock('@/modules/knowledge/actions/kspzActions', () => ({
 
 import { CoverageMatrix } from './CoverageMatrix'
 import { toggleKspzCoverage } from '../actions/kspzActions'
-import type { KspzTopic, KspzTableColumn } from '../types'
+import type { KspzTopic } from '../types'
 
 // Minimal fixtures
 const TOPICS: KspzTopic[] = [
-  { id: 'topic-1', knowledgeTableId: 'table-1', name: 'TeamWork', order: 0 },
-  { id: 'topic-2', knowledgeTableId: 'table-1', name: 'Feedback', order: 1 },
-]
-
-const COLUMNS: KspzTableColumn[] = [
-  {
-    knowledgeTableId: 'table-1',
-    knowledgeTransferTypeId: 'tt-1',
-    knowledgeTransferType: { id: 'tt-1', name: 'Training' },
-  },
-  {
-    knowledgeTableId: 'table-1',
-    knowledgeTransferTypeId: 'tt-2',
-    knowledgeTransferType: { id: 'tt-2', name: 'Sharing' },
-  },
+  { id: 'topic-1', knowledgeTableId: 'table-1', name: 'TeamWork', order: 0, transferTypes: [{ knowledgeTransferTypeId: 'tt-1' }, { knowledgeTransferTypeId: 'tt-2' }] },
+  { id: 'topic-2', knowledgeTableId: 'table-1', name: 'Feedback', order: 1, transferTypes: [{ knowledgeTransferTypeId: 'tt-1' }, { knowledgeTransferTypeId: 'tt-2' }] },
 ]
 
 const MEMBERS = [
@@ -42,7 +29,6 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={true}
@@ -55,36 +41,16 @@ describe('CoverageMatrix', () => {
     expect(screen.getAllByText('Feedback').length).toBeGreaterThan(0)
   })
 
-  it('renders transfer type column sub-headers', () => {
-    render(
-      <CoverageMatrix
-        topics={TOPICS}
-        columns={COLUMNS}
-        members={MEMBERS}
-        coverage={[]}
-        canEdit={true}
-      />
-    )
-
-    // Each transfer type header appears once per topic group
-    const trainingHeaders = screen.getAllByText('Training')
-    const sharingHeaders = screen.getAllByText('Sharing')
-    expect(trainingHeaders.length).toBeGreaterThan(0)
-    expect(sharingHeaders.length).toBeGreaterThan(0)
-  })
-
   it('shows no covered indicators when coverage is empty', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={true}
       />
     )
 
-    // No checkmark SVG paths should render — covered cells render an svg path
     const svgPaths = document.querySelectorAll('svg path')
     expect(svgPaths.length).toBe(0)
   })
@@ -93,16 +59,14 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[
-          { memberId: 'mem-1', knowledgeTopicId: 'topic-1', knowledgeTransferTypeId: 'tt-1', coveredAt: new Date() },
+          { memberId: 'mem-1', knowledgeTopicId: 'topic-1', coveredAt: new Date() },
         ]}
         canEdit={true}
       />
     )
 
-    // Covered button should have the green class
     const coveredButtons = document.querySelectorAll('button.bg-\\[\\#3CB371\\]')
     expect(coveredButtons.length).toBe(1)
   })
@@ -111,10 +75,9 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[
-          { memberId: 'mem-1', knowledgeTopicId: 'topic-1', knowledgeTransferTypeId: 'tt-1', coveredAt: new Date() },
+          { memberId: 'mem-1', knowledgeTopicId: 'topic-1', coveredAt: new Date() },
         ]}
         canEdit={true}
       />
@@ -124,27 +87,25 @@ describe('CoverageMatrix', () => {
     expect(svgPaths.length).toBe(1)
   })
 
-  it('renders correct number of interactive buttons (members × topics × columns)', () => {
+  it('renders correct number of interactive buttons (members × topics)', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={true}
       />
     )
 
-    // 2 members × 2 topics × 2 columns = 8 buttons
+    // 2 members × 2 topics = 4 buttons
     const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBe(8)
+    expect(buttons.length).toBe(4)
   })
 
   it('all buttons are disabled when canEdit is false', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={false}
@@ -161,7 +122,6 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={false}
@@ -178,7 +138,6 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={[]}
         coverage={[]}
         canEdit={true}
@@ -192,7 +151,6 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={[]}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={true}
@@ -206,10 +164,9 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[
-          { memberId: 'mem-1', knowledgeTopicId: 'topic-1', knowledgeTransferTypeId: 'tt-1', coveredAt: null },
+          { memberId: 'mem-1', knowledgeTopicId: 'topic-1', coveredAt: null },
         ]}
         canEdit={true}
       />
@@ -222,14 +179,14 @@ describe('CoverageMatrix', () => {
     render(
       <CoverageMatrix
         topics={TOPICS}
-        columns={COLUMNS}
         members={MEMBERS}
         coverage={[]}
         canEdit={true}
       />
     )
 
+    // 2 members × 2 topics = 4 uncovered buttons
     const uncoveredButtons = screen.getAllByTitle('Не покрито')
-    expect(uncoveredButtons.length).toBe(8)
+    expect(uncoveredButtons.length).toBe(4)
   })
 })

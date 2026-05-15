@@ -65,7 +65,7 @@ export async function deleteKspzTable(id: string) {
 export async function createKspzTopic(input: KspzTopicCreateInput) {
   try {
     await requireRole(Role.Admin, Role.VP4HR)
-    const { knowledgeTableId, name } = kspzTopicCreateSchema.parse(input)
+    const { knowledgeTableId, name, transferTypeIds } = kspzTopicCreateSchema.parse(input)
 
     const maxOrder = await prisma.knowledgeTopic.aggregate({
       where: { knowledgeTableId },
@@ -74,7 +74,14 @@ export async function createKspzTopic(input: KspzTopicCreateInput) {
     const order = (maxOrder._max.order ?? -1) + 1
 
     const topic = await prisma.knowledgeTopic.create({
-      data: { knowledgeTableId, name, order },
+      data: {
+        knowledgeTableId,
+        name,
+        order,
+        transferTypes: {
+          create: transferTypeIds.map((id) => ({ knowledgeTransferTypeId: id })),
+        },
+      },
     })
 
     revalidatePath(`/knowledge/${knowledgeTableId}`)
@@ -87,8 +94,22 @@ export async function createKspzTopic(input: KspzTopicCreateInput) {
 export async function updateKspzTopic(input: KspzTopicUpdateInput) {
   try {
     await requireRole(Role.Admin, Role.VP4HR)
-    const { id, name } = kspzTopicUpdateSchema.parse(input)
-    const topic = await prisma.knowledgeTopic.update({ where: { id }, data: { name } })
+    const { id, name, transferTypeIds } = kspzTopicUpdateSchema.parse(input)
+
+    const topic = await prisma.$transaction(async (tx) => {
+      await tx.knowledgeTopicTransferType.deleteMany({ where: { knowledgeTopicId: id } })
+      const updated = await tx.knowledgeTopic.update({ where: { id }, data: { name } })
+      if (transferTypeIds.length > 0) {
+        await tx.knowledgeTopicTransferType.createMany({
+          data: transferTypeIds.map((ttId) => ({
+            knowledgeTopicId: id,
+            knowledgeTransferTypeId: ttId,
+          })),
+        })
+      }
+      return updated
+    })
+
     revalidatePath(`/knowledge/${topic.knowledgeTableId}`)
     return { success: true, data: topic }
   } catch (error) {
@@ -112,7 +133,7 @@ export async function toggleKspzCoverage(input: KspzCoverageToggleInput) {
     const session = await getSession()
     if (!session?.user) throw new Error('Unauthorized')
 
-    const { memberId, knowledgeTopicId, knowledgeTransferTypeId, covered } = kspzCoverageToggleSchema.parse(input)
+    const { memberId, knowledgeTopicId, covered } = kspzCoverageToggleSchema.parse(input)
     const role = session.user.role as Role
 
     if (role === Role.FullMember) {
@@ -131,15 +152,13 @@ export async function toggleKspzCoverage(input: KspzCoverageToggleInput) {
 
     if (covered) {
       await prisma.knowledgeCoverage.upsert({
-        where: {
-          knowledge_coverage_unique: { memberId, knowledgeTopicId, knowledgeTransferTypeId },
-        },
-        create: { memberId, knowledgeTopicId, knowledgeTransferTypeId },
+        where: { knowledge_coverage_unique: { memberId, knowledgeTopicId } },
+        create: { memberId, knowledgeTopicId },
         update: {},
       })
     } else {
       await prisma.knowledgeCoverage.deleteMany({
-        where: { memberId, knowledgeTopicId, knowledgeTransferTypeId },
+        where: { memberId, knowledgeTopicId },
       })
     }
 

@@ -3,6 +3,7 @@ import { getKspzTableById } from '@/modules/knowledge/repository/kspzTableReposi
 import { getCoverageMatrixForTable } from '@/modules/knowledge/repository/kspzCoverageRepository'
 import { KspzTopicManager } from '@/modules/knowledge/components/KspzTopicManager'
 import { CoverageMatrix } from '@/modules/knowledge/components/CoverageMatrix'
+import { DeleteKspzTableButton } from '@/modules/knowledge/components/DeleteKspzTableButton'
 import { getSession } from '@/shared/lib/auth'
 import { prisma } from '@/shared/lib/prisma'
 import Link from 'next/link'
@@ -29,7 +30,7 @@ export default async function KspzTableDetailPage({ params }: { params: Promise<
   const canViewMatrix = role === Role.Admin || role === Role.VP4HR
 
   let matrixMembers: { id: string; firstName: string; lastName: string }[] = []
-  let coverageRecords: { memberId: string; knowledgeTopicId: string; knowledgeTransferTypeId: string; coveredAt: Date | null }[] = []
+  let coverageRecords: { memberId: string; knowledgeTopicId: string; coveredAt: Date | null }[] = []
 
   if (canViewMatrix) {
     matrixMembers = await prisma.member.findMany({
@@ -48,12 +49,17 @@ export default async function KspzTableDetailPage({ params }: { params: Promise<
         ← КСПЗ
       </Link>
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
         <h1 className="text-[22px] font-bold tracking-[-0.3px] text-gray-900">{table.name}</h1>
         {table.targetStatus && (
           <span className="text-[11px] font-semibold px-2 py-0.5 rounded-[5px] bg-[#E8EDF8] text-[#0A3D91]">
             {statusLabels[table.targetStatus]}
           </span>
+        )}
+        {canEdit && (
+          <div className="ml-auto">
+            <DeleteKspzTableButton tableId={table.id} tableName={table.name} />
+          </div>
         )}
       </div>
 
@@ -76,7 +82,7 @@ export default async function KspzTableDetailPage({ params }: { params: Promise<
           </div>
           <div className="p-4">
             {canEdit ? (
-              <KspzTopicManager tableId={table.id} topics={table.topics} />
+              <KspzTopicManager tableId={table.id} topics={table.topics} tableColumns={table.columns} />
             ) : (
               <div className="space-y-1">
                 {table.topics.length === 0 ? (
@@ -106,7 +112,6 @@ export default async function KspzTableDetailPage({ params }: { params: Promise<
               ) : (
                 <CoverageMatrix
                   topics={table.topics}
-                  columns={table.columns}
                   members={matrixMembers}
                   coverage={coverageRecords}
                   canEdit={canEdit}

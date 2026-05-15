@@ -11,7 +11,6 @@ export async function getCoverageForMember(memberId: string, knowledgeTableId: s
     where: { memberId, knowledgeTopicId: { in: topicIds } },
     select: {
       knowledgeTopicId: true,
-      knowledgeTransferTypeId: true,
       coveredAt: true,
     },
   })
@@ -29,7 +28,6 @@ export async function getCoverageMatrixForTable(knowledgeTableId: string) {
     select: {
       memberId: true,
       knowledgeTopicId: true,
-      knowledgeTransferTypeId: true,
       coveredAt: true,
     },
   })

@@ -7,6 +7,7 @@ export interface KspzTopic {
   knowledgeTableId: string
   name: string
   order: number
+  transferTypes: { knowledgeTransferTypeId: string }[]
 }
 
 export interface KspzTransferType {

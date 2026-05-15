@@ -16,17 +16,18 @@ export const kspzTableUpdateSchema = z.object({
 export const kspzTopicCreateSchema = z.object({
   knowledgeTableId: z.string(),
   name: z.string().min(1, 'Назва теми обов\'язкова'),
+  transferTypeIds: z.array(z.string()),
 })
 
 export const kspzTopicUpdateSchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'Назва теми обов\'язкова'),
+  transferTypeIds: z.array(z.string()),
 })
 
 export const kspzCoverageToggleSchema = z.object({
   memberId: z.string(),
   knowledgeTopicId: z.string(),
-  knowledgeTransferTypeId: z.string(),
   covered: z.boolean(),
 })
 
