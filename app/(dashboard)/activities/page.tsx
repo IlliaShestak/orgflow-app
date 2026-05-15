@@ -1,4 +1,4 @@
-﻿import { getActivities } from '@/modules/activities/repository/activityRepository'
+import { getActivities } from '@/modules/activities/repository/activityRepository'
 import { ActivityTypeBadge } from '@/modules/activities/components/ActivityTypeBadge'
 import { AddActivityDialog } from '@/modules/activities/components/AddActivityDialog'
 import { getSession } from '@/shared/lib/auth'
@@ -8,16 +8,17 @@ import { Role, ActivityType } from '@/generated/prisma'
 export default async function ActivitiesPage({
   searchParams,
 }: {
-  searchParams: { type?: string; search?: string }
+  searchParams: Promise<{ type?: string; search?: string }>
 }) {
   const session = await getSession()
   const role = session?.user?.role as Role | undefined
   const canCreate = role === Role.Admin || role === Role.VP4HR
 
-  const typeFilter = searchParams.type as ActivityType | undefined
+  const { type, search } = await searchParams
+  const typeFilter = type as ActivityType | undefined
   const activities = await getActivities({
     type: typeFilter,
-    search: searchParams.search,
+    search,
   })
 
   const typeLabels: Record<string, string> = {
@@ -31,8 +32,8 @@ export default async function ActivitiesPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[22px] font-bold tracking-[-0.3px] text-gray-900">Р—Р°С…РѕРґРё</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{activities.length} Р·Р°С…РѕРґС–РІ</p>
+          <h1 className="text-[22px] font-bold tracking-[-0.3px] text-gray-900">Заходи</h1>
+          <p className="text-xs text-gray-400 mt-0.5">{activities.length} заходів</p>
         </div>
         {canCreate && <AddActivityDialog />}
       </div>
@@ -47,7 +48,7 @@ export default async function ActivitiesPage({
               : 'bg-white border border-gray-200 text-gray-600 hover:border-[#E85D04] hover:text-[#E85D04]'
           }`}
         >
-          Р’СЃС–
+          {'Всі'}
         </Link>
         {Object.entries(typeLabels).map(([val, label]) => (
           <Link
@@ -64,15 +65,15 @@ export default async function ActivitiesPage({
         ))}
       </div>
 
-      {/* Table */}
+      {/* List */}
       {activities.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-            <span className="text-gray-300 text-2xl">рџ“…</span>
+            <span className="text-gray-300 text-2xl">{'📅'}</span>
           </div>
-          <p className="text-sm font-medium text-gray-600">Р—Р°С…РѕРґС–РІ РЅРµРјР°С”</p>
+          <p className="text-sm font-medium text-gray-600">{'Заходів немає'}</p>
           <p className="text-xs text-gray-400 mt-1">
-            {canCreate ? 'Р”РѕРґР°Р№С‚Рµ РїРµСЂС€РёР№ Р·Р°С…С–Рґ' : 'Р—Р°С…РѕРґРё С‰Рµ РЅРµ Р·Р°РїР»Р°РЅРѕРІР°РЅС–'}
+            {canCreate ? 'Додайте перший захід' : 'Заходи ще не заплановані'}
           </p>
         </div>
       ) : (
@@ -81,19 +82,19 @@ export default async function ActivitiesPage({
             <thead>
               <tr className="bg-[#F7F8FA]">
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  Р”Р°С‚Р°
+                  {'Дата'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  РўРёРї
+                  {'Тип'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  РћРїРёСЃ
+                  {'Опис'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  РџСЂРёСЃСѓС‚РЅС–С…
+                  {'Присутніх'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  РџСѓРЅРєС‚С–РІ
+                  {'Пунктів'}
                 </th>
               </tr>
             </thead>

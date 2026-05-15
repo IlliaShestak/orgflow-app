@@ -2,7 +2,8 @@ import NextAuth from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import Credentials from 'next-auth/providers/credentials'
 import { prisma } from '@/shared/lib/prisma'
-import { Role } from '@prisma/client'
+import { authConfig } from '@/auth.config'
+import { Role } from '@/generated/prisma'
 import { z } from 'zod'
 
 declare module 'next-auth' {
@@ -20,11 +21,8 @@ declare module 'next-auth' {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: 'jwt' },
-  pages: {
-    signIn: '/login',
-  },
   providers: [
     Credentials({
       name: 'credentials',

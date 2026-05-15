@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useTransition } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -34,28 +34,30 @@ export function AddActivityDialog() {
       if (result.success) {
         setOpen(false)
       } else {
-        setError(result.error ?? 'РџРѕРјРёР»РєР°')
+        setError(result.error ?? 'Помилка')
       }
     })
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button className="bg-[#E85D04] hover:bg-[#F4845F] text-white rounded-[7px] px-[14px] py-[7px] text-xs font-semibold h-auto">
-          + Р”РѕРґР°С‚Рё Р·Р°С…С–Рґ
-        </Button>
+      <DialogTrigger
+        render={
+          <Button className="bg-[#E85D04] hover:bg-[#F4845F] text-white rounded-[7px] px-[14px] py-[7px] text-xs font-semibold h-auto" />
+        }
+      >
+        {'+ Додати захід'}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>РќРѕРІРёР№ Р·Р°С…С–Рґ</DialogTitle>
+          <DialogTitle>{'Новий захід'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-1.5">
-            <Label htmlFor="type">РўРёРї Р·Р°С…РѕРґСѓ</Label>
+            <Label htmlFor="type">{'Тип заходу'}</Label>
             <Select name="type" required>
               <SelectTrigger id="type">
-                <SelectValue placeholder="РћР±РµСЂС–С‚СЊ С‚РёРї" />
+                <SelectValue placeholder="Оберіть тип" />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(typeLabels).map(([val, label]) => (
@@ -65,21 +67,21 @@ export function AddActivityDialog() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="date">Р”Р°С‚Р°</Label>
+            <Label htmlFor="date">{'Дата'}</Label>
             <Input id="date" name="date" type="date" required />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="description">РћРїРёСЃ</Label>
-            <Textarea id="description" name="description" placeholder="РћРїРёСЃ Р·Р°С…РѕРґСѓ..." required rows={3} />
+            <Label htmlFor="description">{'Опис'}</Label>
+            <Textarea id="description" name="description" placeholder="Опис заходу..." required rows={3} />
           </div>
           {error && <p className="text-red-500 text-xs">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} className="text-xs">
-              РЎРєР°СЃСѓРІР°С‚Рё
+              {'Скасувати'}
             </Button>
             <Button type="submit" disabled={isPending}
               className="bg-[#E85D04] hover:bg-[#F4845F] text-white text-xs rounded-[7px]">
-              {isPending ? 'Р—Р±РµСЂРµР¶РµРЅРЅСЏ...' : 'Р—Р±РµСЂРµРіС‚Рё'}
+              {isPending ? 'Збереження...' : 'Зберегти'}
             </Button>
           </div>
         </form>
