@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { UserWithMember } from '../types'
 import { updateUserRole } from '../actions/updateUserRole'
 import { deleteUser } from '../actions/deleteUser'
@@ -29,6 +30,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter()
 
   function handleRoleChange() {
     setError(null)
@@ -47,8 +49,13 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   function handleDelete() {
     startTransition(async () => {
-      await deleteUser(user.id)
+      const result = await deleteUser(user.id)
       setConfirmDelete(false)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        router.refresh()
+      }
     })
   }
 
