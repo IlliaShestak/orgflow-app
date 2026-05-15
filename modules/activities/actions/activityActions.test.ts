@@ -3,10 +3,9 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 const mockPrisma = vi.hoisted(() => {
   const mp = {
     activity: { create: vi.fn(), update: vi.fn(), delete: vi.fn() },
-    activityAttendance: { upsert: vi.fn(), deleteMany: vi.fn() },
+    activityAttendance: { upsert: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
     activityAgendaItem: { deleteMany: vi.fn(), createMany: vi.fn(), findMany: vi.fn() },
-    knowledgeTopic: { findUnique: vi.fn() },
-    knowledgeCoverage: { upsert: vi.fn(), deleteMany: vi.fn() },
+    knowledgeCoverage: { upsert: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
     $transaction: vi.fn(),
   }
   mp.$transaction.mockImplementation(async (fn: (tx: typeof mp) => Promise<unknown>) => fn(mp))
@@ -29,6 +28,7 @@ const VALID_CUID2 = 'clxxxxxxxxxxxxxxxxxxxxxx02'
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockPrisma.$transaction.mockImplementation(async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma))
 })
 
 // ---------------------------------------------------------------------------
@@ -38,19 +38,53 @@ beforeEach(() => {
 describe('createActivity', () => {
   it('returns success true when role is authorised and activity is created', async () => {
     vi.mocked(requireRole).mockResolvedValue(undefined)
-    const mockActivity = { id: VALID_CUID, type: 'Gathering', date: new Date(), description: 'test' }
+    const mockActivity = { id: VALID_CUID, name: 'Збір', type: 'Gathering', date: new Date(), description: null }
     mockPrisma.activity.create.mockResolvedValue(mockActivity)
 
-    const result = await createActivity({ type: 'Gathering', date: new Date(), description: 'test' })
+    const result = await createActivity({ name: 'Збір', type: 'Gathering', date: new Date() })
 
     expect(result.success).toBe(true)
     expect(result.data).toEqual(mockActivity)
   })
 
+  it('creates agenda items inside the transaction when provided', async () => {
+    vi.mocked(requireRole).mockResolvedValue(undefined)
+    mockPrisma.activity.create.mockResolvedValue({ id: VALID_CUID })
+    mockPrisma.activityAgendaItem.createMany.mockResolvedValue({ count: 1 })
+
+    await createActivity({
+      name: 'Захід',
+      type: 'SIT',
+      date: new Date(),
+      agendaItems: [{ kind: 'text', text: 'Привітання' }],
+    })
+
+    expect(mockPrisma.activityAgendaItem.createMany).toHaveBeenCalledWith({
+      data: [{ activityId: VALID_CUID, order: 0, text: 'Привітання', knowledgeTopicId: null }],
+    })
+  })
+
+  it('creates attendance records inside the transaction when memberIds provided', async () => {
+    vi.mocked(requireRole).mockResolvedValue(undefined)
+    mockPrisma.activity.create.mockResolvedValue({ id: VALID_CUID })
+    mockPrisma.activityAttendance.createMany.mockResolvedValue({ count: 1 })
+
+    await createActivity({
+      name: 'Захід',
+      type: 'Gathering',
+      date: new Date(),
+      memberIds: [VALID_CUID2],
+    })
+
+    expect(mockPrisma.activityAttendance.createMany).toHaveBeenCalledWith({
+      data: [{ activityId: VALID_CUID, memberId: VALID_CUID2 }],
+    })
+  })
+
   it('returns success false when requireRole throws Unauthorized', async () => {
     vi.mocked(requireRole).mockRejectedValue(new Error('Unauthorized'))
 
-    const result = await createActivity({ type: 'Gathering', date: new Date(), description: 'test' })
+    const result = await createActivity({ name: 'Захід', type: 'Gathering', date: new Date() })
 
     expect(result.success).toBe(false)
     expect(result.error).toBe('Unauthorized')
@@ -118,33 +152,22 @@ describe('saveAgenda', () => {
 // ---------------------------------------------------------------------------
 
 describe('markAttendance', () => {
-  it('auto-assigns knowledge coverage for each transfer type when agenda has topic items', async () => {
+  it('auto-assigns knowledge coverage per topic when agenda has topic items', async () => {
     vi.mocked(getSession).mockResolvedValue({ user: { id: 'u1', role: 'Admin' } } as any)
     mockPrisma.activityAttendance.upsert.mockResolvedValue({})
     mockPrisma.activityAgendaItem.findMany.mockResolvedValue([{ knowledgeTopicId: 'topic-1' }])
-    mockPrisma.knowledgeTopic.findUnique.mockResolvedValue({
-      knowledgeTableId: 'table-1',
-      knowledgeTable: {
-        columns: [
-          { knowledgeTransferTypeId: 'tt-1' },
-          { knowledgeTransferTypeId: 'tt-2' },
-        ],
-      },
-    })
     mockPrisma.knowledgeCoverage.upsert.mockResolvedValue({})
 
     const result = await markAttendance({ activityId: VALID_CUID, memberId: VALID_CUID2 })
 
     expect(result.success).toBe(true)
-    expect(mockPrisma.knowledgeCoverage.upsert).toHaveBeenCalledTimes(2)
+    expect(mockPrisma.knowledgeCoverage.upsert).toHaveBeenCalledTimes(1)
     expect(mockPrisma.knowledgeCoverage.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ knowledgeTransferTypeId: 'tt-1' }),
-      })
-    )
-    expect(mockPrisma.knowledgeCoverage.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        create: expect.objectContaining({ knowledgeTransferTypeId: 'tt-2' }),
+        create: expect.objectContaining({
+          memberId: VALID_CUID2,
+          knowledgeTopicId: 'topic-1',
+        }),
       })
     )
   })
@@ -164,10 +187,6 @@ describe('markAttendance', () => {
     vi.mocked(getSession).mockResolvedValue({ user: { id: 'u1', role: 'Admin' } } as any)
     mockPrisma.activityAttendance.upsert.mockResolvedValue({})
     mockPrisma.activityAgendaItem.findMany.mockResolvedValue([{ knowledgeTopicId: 'topic-1' }])
-    mockPrisma.knowledgeTopic.findUnique.mockResolvedValue({
-      knowledgeTableId: 'table-1',
-      knowledgeTable: { columns: [{ knowledgeTransferTypeId: 'tt-1' }] },
-    })
     mockPrisma.knowledgeCoverage.upsert.mockResolvedValue({})
 
     await markAttendance({ activityId: VALID_CUID, memberId: VALID_CUID2 })
@@ -177,6 +196,20 @@ describe('markAttendance', () => {
         create: expect.objectContaining({ sourceActivityId: VALID_CUID }),
       })
     )
+  })
+
+  it('upserts coverage once per topic when multiple topics in agenda', async () => {
+    vi.mocked(getSession).mockResolvedValue({ user: { id: 'u1', role: 'Admin' } } as any)
+    mockPrisma.activityAttendance.upsert.mockResolvedValue({})
+    mockPrisma.activityAgendaItem.findMany.mockResolvedValue([
+      { knowledgeTopicId: 'topic-1' },
+      { knowledgeTopicId: 'topic-2' },
+    ])
+    mockPrisma.knowledgeCoverage.upsert.mockResolvedValue({})
+
+    await markAttendance({ activityId: VALID_CUID, memberId: VALID_CUID2 })
+
+    expect(mockPrisma.knowledgeCoverage.upsert).toHaveBeenCalledTimes(2)
   })
 
   it('FullMember can mark attendance for self', async () => {

@@ -11,25 +11,54 @@ describe('activityCreateSchema', () => {
     expect(result.success).toBe(false)
     if (!result.success) {
       const paths = result.error.issues.map(i => i.path[0])
+      expect(paths).toContain('name')
       expect(paths).toContain('type')
       expect(paths).toContain('date')
     }
   })
 
-  it('accepts valid full data', () => {
+  it('accepts valid data with only required fields', () => {
     const result = activityCreateSchema.safeParse({
+      name: 'Щотижневий збір',
       type: 'Gathering',
       date: new Date('2024-03-15'),
-      description: 'Щотижневий збір',
     })
     expect(result.success).toBe(true)
   })
 
+  it('accepts valid data with all fields including optional', () => {
+    const result = activityCreateSchema.safeParse({
+      name: 'Збір',
+      type: 'Gathering',
+      date: new Date('2024-03-15'),
+      description: 'Опис заходу',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts omitted description (now optional)', () => {
+    const result = activityCreateSchema.safeParse({
+      name: 'Захід без опису',
+      type: 'SIT',
+      date: new Date(),
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects empty name', () => {
+    const result = activityCreateSchema.safeParse({
+      name: '',
+      type: 'SIT',
+      date: new Date(),
+    })
+    expect(result.success).toBe(false)
+  })
+
   it('rejects unknown type', () => {
     const result = activityCreateSchema.safeParse({
+      name: 'Захід',
       type: 'Workshop',
       date: new Date(),
-      description: 'Опис',
     })
     expect(result.success).toBe(false)
   })
@@ -37,30 +66,44 @@ describe('activityCreateSchema', () => {
   it('accepts all valid activity types', () => {
     for (const type of ['Gathering', 'SIT', 'LeisureEvent']) {
       const result = activityCreateSchema.safeParse({
+        name: 'Захід',
         type,
         date: new Date(),
-        description: 'Опис заходу',
       })
       expect(result.success).toBe(true)
     }
   })
 
-  it('rejects empty description', () => {
+  it('accepts agenda items', () => {
     const result = activityCreateSchema.safeParse({
+      name: 'Захід з порядком денним',
+      type: 'Gathering',
+      date: new Date(),
+      agendaItems: [
+        { kind: 'text', text: 'Привітання' },
+        { kind: 'topic', knowledgeTopicId: 'clh1234567890abcdefghijklm' },
+      ],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts memberIds', () => {
+    const result = activityCreateSchema.safeParse({
+      name: 'Захід',
       type: 'SIT',
       date: new Date(),
-      description: '',
+      memberIds: ['clh1234567890abcdefghijklm'],
     })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 })
 
 describe('activityUpdateSchema', () => {
   it('requires id', () => {
     const result = activityUpdateSchema.safeParse({
+      name: 'Назва',
       type: 'Gathering',
       date: new Date(),
-      description: 'Опис',
     })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -71,9 +114,20 @@ describe('activityUpdateSchema', () => {
   it('accepts valid update with cuid id', () => {
     const result = activityUpdateSchema.safeParse({
       id: 'clh1234567890abcdefghijklm',
+      name: 'Оновлена назва',
       type: 'LeisureEvent',
       date: new Date(),
       description: 'Оновлений опис',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts update without description', () => {
+    const result = activityUpdateSchema.safeParse({
+      id: 'clh1234567890abcdefghijklm',
+      name: 'Назва',
+      type: 'SIT',
+      date: new Date(),
     })
     expect(result.success).toBe(true)
   })

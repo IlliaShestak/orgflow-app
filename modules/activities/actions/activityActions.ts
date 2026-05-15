@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 import { revalidatePath } from 'next/cache'
 import { requireRole, getSession } from '@/shared/lib/auth'
@@ -20,8 +20,45 @@ import {
 export async function createActivity(input: ActivityCreateInput) {
   try {
     await requireRole(Role.Admin, Role.VP4HR)
-    const data = activityCreateSchema.parse(input)
-    const activity = await prisma.activity.create({ data })
+    const { agendaItems, memberIds, ...baseData } = activityCreateSchema.parse(input)
+
+    const activity = await prisma.$transaction(async (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => {
+      const act = await tx.activity.create({ data: baseData })
+
+      if (agendaItems.length > 0) {
+        await tx.activityAgendaItem.createMany({
+          data: agendaItems.map((item, i) => ({
+            activityId: act.id,
+            order: i,
+            text: item.kind === 'text' ? item.text : null,
+            knowledgeTopicId: item.kind === 'topic' ? item.knowledgeTopicId : null,
+          })),
+        })
+      }
+
+      if (memberIds.length > 0) {
+        await tx.activityAttendance.createMany({
+          data: memberIds.map((memberId) => ({ activityId: act.id, memberId })),
+        })
+
+        const topicIds = agendaItems
+          .filter((i): i is { kind: 'topic'; knowledgeTopicId: string } => i.kind === 'topic')
+          .map((i) => i.knowledgeTopicId)
+
+        for (const memberId of memberIds) {
+          for (const knowledgeTopicId of topicIds) {
+            await tx.knowledgeCoverage.upsert({
+              where: { knowledge_coverage_unique: { memberId, knowledgeTopicId } },
+              create: { memberId, knowledgeTopicId, sourceActivityId: act.id },
+              update: {},
+            })
+          }
+        }
+      }
+
+      return act
+    })
+
     revalidatePath('/activities')
     return { success: true, data: activity }
   } catch (error) {
@@ -87,7 +124,6 @@ export async function markAttendance(input: MarkAttendanceInput) {
     const { activityId, memberId } = markAttendanceSchema.parse(input)
     const role = session.user.role as Role
 
-    // RBAC: FullMember can only mark self and own mentees
     if (role === Role.FullMember) {
       const { getMemberByUserId } = await import('@/modules/hr/repository/memberRepository')
       const selfMember = await getMemberByUserId(session.user.id)
@@ -99,14 +135,12 @@ export async function markAttendance(input: MarkAttendanceInput) {
       throw new Error('Unauthorized')
     }
 
-    // Upsert attendance record
     await prisma.activityAttendance.upsert({
       where: { activity_attendance_unique: { activityId, memberId } },
       create: { activityId, memberId },
       update: {},
     })
 
-    // Auto-assign knowledge coverage from agenda topic items
     const agendaItems = await prisma.activityAgendaItem.findMany({
       where: { activityId, knowledgeTopicId: { not: null } },
       select: { knowledgeTopicId: true },
@@ -114,41 +148,11 @@ export async function markAttendance(input: MarkAttendanceInput) {
 
     for (const item of agendaItems) {
       if (!item.knowledgeTopicId) continue
-
-      // Get all transfer type columns for the topic's table
-      const topic = await prisma.knowledgeTopic.findUnique({
-        where: { id: item.knowledgeTopicId },
-        select: {
-          knowledgeTableId: true,
-          knowledgeTable: {
-            select: {
-              columns: { select: { knowledgeTransferTypeId: true } },
-            },
-          },
-        },
+      await prisma.knowledgeCoverage.upsert({
+        where: { knowledge_coverage_unique: { memberId, knowledgeTopicId: item.knowledgeTopicId } },
+        create: { memberId, knowledgeTopicId: item.knowledgeTopicId, sourceActivityId: activityId },
+        update: {},
       })
-
-      if (!topic) continue
-
-      // Upsert coverage for each transfer type in the table
-      for (const col of topic.knowledgeTable.columns) {
-        await prisma.knowledgeCoverage.upsert({
-          where: {
-            knowledge_coverage_unique: {
-              memberId,
-              knowledgeTopicId: item.knowledgeTopicId,
-              knowledgeTransferTypeId: col.knowledgeTransferTypeId,
-            },
-          },
-          create: {
-            memberId,
-            knowledgeTopicId: item.knowledgeTopicId,
-            knowledgeTransferTypeId: col.knowledgeTransferTypeId,
-            sourceActivityId: activityId,
-          },
-          update: {},
-        })
-      }
     }
 
     revalidatePath(`/activities/${activityId}`)

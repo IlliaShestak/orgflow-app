@@ -1,12 +1,13 @@
-﻿import { ActivityType } from '@prisma/client'
+import { ActivityType } from '@prisma/client'
 
 export type { ActivityType }
 
 export interface ActivityListItem {
   id: string
+  name: string
   type: ActivityType
   date: Date
-  description: string
+  description: string | null
   createdAt: Date
   _count: { attendance: number; agendaItems: number }
 }
@@ -22,9 +23,10 @@ export interface AgendaItem {
 
 export interface ActivityDetail {
   id: string
+  name: string
   type: ActivityType
   date: Date
-  description: string
+  description: string | null
   createdAt: Date
   agendaItems: AgendaItem[]
   attendance: {

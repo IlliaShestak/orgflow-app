@@ -8,9 +8,10 @@ import { prisma } from '@/shared/lib/prisma'
 import Link from 'next/link'
 import { Role } from '@prisma/client'
 
-export default async function ActivityDetailPage({ params }: { params: { id: string } }) {
+export default async function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const [activity, session] = await Promise.all([
-    getActivityById(params.id),
+    getActivityById(id),
     getSession(),
   ])
 
@@ -67,14 +68,19 @@ export default async function ActivityDetailPage({ params }: { params: { id: str
           <div className="flex items-center gap-3 mb-1">
             <ActivityTypeBadge type={activity.type} />
             <h1 className="text-[22px] font-bold tracking-[-0.3px] text-gray-900">
-              {new Date(activity.date).toLocaleDateString('uk-UA', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
+              {activity.name}
             </h1>
           </div>
-          <p className="text-sm text-gray-600">{activity.description}</p>
+          <p className="text-sm text-gray-400">
+            {new Date(activity.date).toLocaleDateString('uk-UA', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+          {activity.description && (
+            <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+          )}
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { getActivities } from '@/modules/activities/repository/activityRepositor
 import { ActivityTypeBadge } from '@/modules/activities/components/ActivityTypeBadge'
 import { AddActivityDialog } from '@/modules/activities/components/AddActivityDialog'
 import { getSession } from '@/shared/lib/auth'
+import { prisma } from '@/shared/lib/prisma'
 import Link from 'next/link'
 import { Role, ActivityType } from '@prisma/client'
 
@@ -16,10 +17,23 @@ export default async function ActivitiesPage({
 
   const { type, search } = await searchParams
   const typeFilter = type as ActivityType | undefined
-  const activities = await getActivities({
-    type: typeFilter,
-    search,
-  })
+  const activities = await getActivities({ type: typeFilter, search })
+
+  let dialogTopics: { id: string; name: string; knowledgeTable: { name: string } }[] = []
+  let dialogMembers: { id: string; firstName: string; lastName: string }[] = []
+
+  if (canCreate) {
+    ;[dialogTopics, dialogMembers] = await Promise.all([
+      prisma.knowledgeTopic.findMany({
+        select: { id: true, name: true, knowledgeTable: { select: { name: true } } },
+        orderBy: [{ knowledgeTable: { name: 'asc' } }, { order: 'asc' }],
+      }),
+      prisma.member.findMany({
+        select: { id: true, firstName: true, lastName: true },
+        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+      }),
+    ])
+  }
 
   const typeLabels: Record<string, string> = {
     Gathering: 'Gathering',
@@ -32,10 +46,12 @@ export default async function ActivitiesPage({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[22px] font-bold tracking-[-0.3px] text-gray-900">Заходи</h1>
+          <h1 className="text-[22px] font-bold tracking-[-0.3px] text-gray-900">{'Заходи'}</h1>
           <p className="text-xs text-gray-400 mt-0.5">{activities.length} заходів</p>
         </div>
-        {canCreate && <AddActivityDialog />}
+        {canCreate && (
+          <AddActivityDialog availableTopics={dialogTopics} availableMembers={dialogMembers} />
+        )}
       </div>
 
       {/* Filters */}
@@ -82,13 +98,13 @@ export default async function ActivitiesPage({
             <thead>
               <tr className="bg-[#F7F8FA]">
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  {'Дата'}
+                  {'Назва'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
                   {'Тип'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
-                  {'Опис'}
+                  {'Дата'}
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.8px] uppercase text-gray-400">
                   {'Присутніх'}
@@ -105,17 +121,23 @@ export default async function ActivitiesPage({
                   className="border-t border-gray-100 hover:bg-[#FAFBFD] transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <Link href={`/activities/${activity.id}`} className="text-sm text-gray-800 hover:text-[#E85D04]">
-                      {new Date(activity.date).toLocaleDateString('uk-UA')}
+                    <Link
+                      href={`/activities/${activity.id}`}
+                      className="text-sm font-medium text-gray-800 hover:text-[#E85D04]"
+                    >
+                      {activity.name}
                     </Link>
+                    {activity.description && (
+                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+                        {activity.description}
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <ActivityTypeBadge type={activity.type} />
                   </td>
-                  <td className="px-4 py-3">
-                    <Link href={`/activities/${activity.id}`} className="text-sm text-gray-700 hover:text-[#E85D04] line-clamp-1">
-                      {activity.description}
-                    </Link>
+                  <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                    {new Date(activity.date).toLocaleDateString('uk-UA')}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     {activity._count.attendance}

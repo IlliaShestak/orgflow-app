@@ -1,17 +1,7 @@
 import { z } from 'zod'
 import { ActivityType } from '@prisma/client'
 
-export const activityCreateSchema = z.object({
-  type: z.nativeEnum(ActivityType),
-  date: z.coerce.date(),
-  description: z.string().min(1, 'Опис обовʼязковий'),
-})
-
-export const activityUpdateSchema = activityCreateSchema.extend({
-  id: z.string().cuid(),
-})
-
-export const agendaItemSchema = z.discriminatedUnion('kind', [
+const agendaItemDraftSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('text'),
     text: z.string().min(1, 'Текст обовʼязковий'),
@@ -21,6 +11,23 @@ export const agendaItemSchema = z.discriminatedUnion('kind', [
     knowledgeTopicId: z.string().cuid(),
   }),
 ])
+
+export const activityCreateSchema = z.object({
+  name: z.string().min(1, 'Назва обовʼязкова'),
+  type: z.nativeEnum(ActivityType),
+  date: z.coerce.date(),
+  description: z.string().optional(),
+  agendaItems: z.array(agendaItemDraftSchema).optional().default([]),
+  memberIds: z.array(z.string().cuid()).optional().default([]),
+})
+
+export const activityUpdateSchema = z.object({
+  id: z.string().cuid(),
+  name: z.string().min(1, 'Назва обовʼязкова'),
+  type: z.nativeEnum(ActivityType),
+  date: z.coerce.date(),
+  description: z.string().optional(),
+})
 
 export const saveAgendaSchema = z.object({
   activityId: z.string().cuid(),
@@ -44,7 +51,7 @@ export const removeAttendanceSchema = z.object({
   memberId: z.string().cuid(),
 })
 
-export type ActivityCreateInput = z.infer<typeof activityCreateSchema>
+export type ActivityCreateInput = z.input<typeof activityCreateSchema>
 export type ActivityUpdateInput = z.infer<typeof activityUpdateSchema>
 export type SaveAgendaInput = z.infer<typeof saveAgendaSchema>
 export type MarkAttendanceInput = z.infer<typeof markAttendanceSchema>

@@ -1,4 +1,4 @@
-﻿import { prisma } from '@/shared/lib/prisma'
+import { prisma } from '@/shared/lib/prisma'
 import { ActivityType } from '@prisma/client'
 
 export async function getActivities(filters: { type?: ActivityType; search?: string } = {}) {
@@ -6,10 +6,16 @@ export async function getActivities(filters: { type?: ActivityType; search?: str
   return prisma.activity.findMany({
     where: {
       ...(type && { type }),
-      ...(search && { description: { contains: search, mode: 'insensitive' } }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
     },
     select: {
       id: true,
+      name: true,
       type: true,
       date: true,
       description: true,
