@@ -1,5 +1,4 @@
-import { describe, it, expect } from 'vitest'
-import { memberCreateSchema } from './memberSchema'
+import { memberCreateSchema, memberUpdateSchema } from './memberSchema'
 
 describe('memberCreateSchema', () => {
   it('rejects missing required fields', () => {
@@ -58,5 +57,85 @@ describe('memberCreateSchema', () => {
       status: 'Unknown',
     })
     expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid gender value', () => {
+    const result = memberCreateSchema.safeParse({
+      firstName: 'Іван',
+      lastName: 'Коваленко',
+      joinedAt: new Date(),
+      gender: 'Unknown',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid state value', () => {
+    const result = memberCreateSchema.safeParse({
+      firstName: 'Іван',
+      lastName: 'Коваленко',
+      joinedAt: new Date(),
+      state: 'Pending',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects negative studyYear', () => {
+    const result = memberCreateSchema.safeParse({
+      firstName: 'Іван',
+      lastName: 'Коваленко',
+      joinedAt: new Date(),
+      studyYear: -1,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts null/undefined optional fields', () => {
+    const result = memberCreateSchema.safeParse({
+      firstName: 'Іван',
+      lastName: 'Коваленко',
+      joinedAt: new Date(),
+      email: null,
+      phone: null,
+      telegram: undefined,
+      instagram: null,
+      facebook: undefined,
+      family: null,
+      birthDate: null,
+      studyYear: null,
+      mentorId: null,
+    })
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('memberUpdateSchema', () => {
+  it('requires id field', () => {
+    const result = memberUpdateSchema.safeParse({
+      firstName: 'Іван',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.map(i => i.path[0])).toContain('id')
+    }
+  })
+
+  it('accepts partial update with id', () => {
+    const result = memberUpdateSchema.safeParse({
+      id: 'abc123',
+      lastName: 'Шевченко',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts full update with id', () => {
+    const result = memberUpdateSchema.safeParse({
+      id: 'abc123',
+      firstName: 'Марія',
+      lastName: 'Шевченко',
+      joinedAt: new Date(),
+      status: 'Full',
+      state: 'Active',
+    })
+    expect(result.success).toBe(true)
   })
 })

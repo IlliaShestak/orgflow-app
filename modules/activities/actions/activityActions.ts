@@ -25,7 +25,7 @@ export async function createActivity(input: ActivityCreateInput) {
     revalidatePath('/activities')
     return { success: true, data: activity }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'РџРѕРјРёР»РєР° СЃС‚РІРѕСЂРµРЅРЅСЏ Р·Р°С…РѕРґСѓ' }
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка створення заходу' }
   }
 }
 
@@ -38,7 +38,7 @@ export async function updateActivity(input: ActivityUpdateInput) {
     revalidatePath(`/activities/${id}`)
     return { success: true, data: activity }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'РџРѕРјРёР»РєР° РѕРЅРѕРІР»РµРЅРЅСЏ Р·Р°С…РѕРґСѓ' }
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка оновлення заходу' }
   }
 }
 
@@ -49,7 +49,7 @@ export async function deleteActivity(id: string) {
     revalidatePath('/activities')
     return { success: true }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'РџРѕРјРёР»РєР° РІРёРґР°Р»РµРЅРЅСЏ Р·Р°С…РѕРґСѓ' }
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка видалення заходу' }
   }
 }
 
@@ -75,7 +75,7 @@ export async function saveAgenda(input: SaveAgendaInput) {
     revalidatePath(`/activities/${activityId}`)
     return { success: true }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'РџРѕРјРёР»РєР° Р·Р±РµСЂРµР¶РµРЅРЅСЏ РїРѕСЂСЏРґРєСѓ РґРµРЅРЅРѕРіРѕ' }
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка збереження порядку денного' }
   }
 }
 
@@ -154,7 +154,7 @@ export async function markAttendance(input: MarkAttendanceInput) {
     revalidatePath(`/activities/${activityId}`)
     return { success: true }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'РџРѕРјРёР»РєР° РІС–РґРјС–С‚РєРё РІС–РґРІС–РґСѓРІР°РЅРѕСЃС‚С–' }
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка відмітки відвідуваності' }
   }
 }
 
@@ -181,6 +181,6 @@ export async function removeAttendance(input: { activityId: string; memberId: st
     revalidatePath(`/activities/${activityId}`)
     return { success: true }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'РџРѕРјРёР»РєР° РІРёРґР°Р»РµРЅРЅСЏ РІС–РґРІС–РґСѓРІР°РЅРѕСЃС‚С–' }
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка видалення відвідуваності' }
   }
 }
