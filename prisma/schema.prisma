@@ -210,9 +210,10 @@ model ApplicationHistory {
 
 model Activity {
   id          String       @id @default(cuid())
+  name        String
   type        ActivityType
   date        DateTime
-  description String
+  description String?
   createdAt   DateTime     @default(now()) @map("created_at")
 
   agendaItems ActivityAgendaItem[]
@@ -230,7 +231,7 @@ model ActivityAgendaItem {
   knowledgeTopicId String? @map("knowledge_topic_id")
 
   activity       Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  knowledgeTopic KnowledgeTopic? @relation(fields: [knowledgeTopicId], references: [id])
+  knowledgeTopic KnowledgeTopic? @relation(fields: [knowledgeTopicId], references: [id], onDelete: SetNull)
 
   @@index([activityId], name: "activity_agenda_items_activity_id_idx")
   @@map("activity_agenda_items")
@@ -271,9 +272,10 @@ model KnowledgeTopic {
   name             String
   order            Int
 
-  knowledgeTable KnowledgeTable      @relation(fields: [knowledgeTableId], references: [id], onDelete: Cascade)
+  knowledgeTable KnowledgeTable               @relation(fields: [knowledgeTableId], references: [id], onDelete: Cascade)
   agendaItems    ActivityAgendaItem[]
   coverage       KnowledgeCoverage[]
+  transferTypes  KnowledgeTopicTransferType[]
 
   @@index([knowledgeTableId], name: "knowledge_topics_table_id_idx")
   @@map("knowledge_topics")
@@ -284,10 +286,21 @@ model KnowledgeTransferType {
   id   String @id @default(cuid())
   name String @unique
 
-  tableColumns KnowledgeTableColumn[]
-  coverage     KnowledgeCoverage[]
+  tableColumns       KnowledgeTableColumn[]
+  topicTransferTypes KnowledgeTopicTransferType[]
 
   @@map("knowledge_transfer_types")
+}
+
+model KnowledgeTopicTransferType {
+  knowledgeTopicId        String @map("knowledge_topic_id")
+  knowledgeTransferTypeId String @map("knowledge_transfer_type_id")
+
+  knowledgeTopic        KnowledgeTopic        @relation(fields: [knowledgeTopicId], references: [id], onDelete: Cascade)
+  knowledgeTransferType KnowledgeTransferType @relation(fields: [knowledgeTransferTypeId], references: [id])
+
+  @@id([knowledgeTopicId, knowledgeTransferTypeId])
+  @@map("knowledge_topic_transfer_types")
 }
 
 model KnowledgeTableColumn {
@@ -302,18 +315,16 @@ model KnowledgeTableColumn {
 }
 
 model KnowledgeCoverage {
-  id                      String   @id @default(cuid())
-  memberId                String   @map("member_id")
-  knowledgeTopicId        String   @map("knowledge_topic_id")
-  knowledgeTransferTypeId String   @map("knowledge_transfer_type_id")
-  coveredAt               DateTime @default(now()) @map("covered_at")
-  sourceActivityId        String?  @map("source_activity_id")
+  id               String   @id @default(cuid())
+  memberId         String   @map("member_id")
+  knowledgeTopicId String   @map("knowledge_topic_id")
+  coveredAt        DateTime @default(now()) @map("covered_at")
+  sourceActivityId String?  @map("source_activity_id")
 
-  member                Member                @relation(fields: [memberId], references: [id])
-  knowledgeTopic        KnowledgeTopic        @relation(fields: [knowledgeTopicId], references: [id])
-  knowledgeTransferType KnowledgeTransferType @relation(fields: [knowledgeTransferTypeId], references: [id])
+  member         Member         @relation(fields: [memberId], references: [id])
+  knowledgeTopic KnowledgeTopic @relation(fields: [knowledgeTopicId], references: [id], onDelete: Cascade)
 
-  @@unique([memberId, knowledgeTopicId, knowledgeTransferTypeId], name: "knowledge_coverage_unique")
+  @@unique([memberId, knowledgeTopicId], name: "knowledge_coverage_unique")
   @@index([memberId], name: "knowledge_coverage_member_id_idx")
   @@index([knowledgeTopicId], name: "knowledge_coverage_topic_id_idx")
   @@map("knowledge_coverage")
