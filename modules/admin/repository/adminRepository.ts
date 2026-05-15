@@ -63,13 +63,12 @@ export async function updateUserRole(userId: string, role: Role): Promise<void> 
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-  await prisma.member.updateMany({
-    where: { userId },
-    data: { userId: null },
-  })
-  await prisma.user.delete({
-    where: { id: userId },
-  })
+  await prisma.$transaction([
+    prisma.member.updateMany({ where: { userId }, data: { userId: null } }),
+    prisma.session.deleteMany({ where: { userId } }),
+    prisma.account.deleteMany({ where: { userId } }),
+    prisma.user.delete({ where: { id: userId } }),
+  ])
 }
 
 export async function getMembersForSelect(): Promise<MemberForSelect[]> {

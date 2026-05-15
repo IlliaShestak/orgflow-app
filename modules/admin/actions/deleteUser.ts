@@ -15,7 +15,8 @@ export async function deleteUser(userId: string) {
     await deleteUserInDb(userId)
     revalidatePath('/admin/users')
     return { success: true }
-  } catch {
-    return { error: 'Помилка при видаленні користувача' }
+  } catch (e) {
+    console.error('[deleteUser]', e)
+    return { error: e instanceof Error ? e.message : 'Помилка при видаленні користувача' }
   }
 }
