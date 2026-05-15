@@ -31,9 +31,10 @@ interface MemberData {
 interface MemberEditDialogProps {
   member: MemberData
   mentors: MentorOption[]
+  restrictedMode?: boolean
 }
 
-export function MemberEditDialog({ member, mentors }: MemberEditDialogProps) {
+export function MemberEditDialog({ member, mentors, restrictedMode = false }: MemberEditDialogProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -59,6 +60,7 @@ export function MemberEditDialog({ member, mentors }: MemberEditDialogProps) {
             </div>
             <div className="p-6">
               <MemberForm
+                restrictedMode={restrictedMode}
                 initialData={{
                   id: member.id,
                   firstName: member.firstName,

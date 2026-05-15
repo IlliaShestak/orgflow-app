@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { changePassword } from '../actions/changePassword'
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -20,6 +20,7 @@ export function ChangePasswordForm() {
       } else {
         setSuccess(true)
         ;(e.target as HTMLFormElement).reset()
+        setTimeout(() => onSuccess?.(), 1000)
       }
     })
   }

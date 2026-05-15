@@ -15,9 +15,10 @@ interface MemberFormProps {
   initialData?: Partial<MemberCreateInput> & { id?: string }
   mentors: MentorOption[]
   onClose?: () => void
+  restrictedMode?: boolean
 }
 
-export function MemberForm({ initialData, mentors, onClose }: MemberFormProps) {
+export function MemberForm({ initialData, mentors, onClose, restrictedMode = false }: MemberFormProps) {
   const router = useRouter()
   const isEdit = !!initialData?.id
 
@@ -88,108 +89,148 @@ export function MemberForm({ initialData, mentors, onClose }: MemberFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Ім&apos;я *</label>
-          <input name="firstName" value={form.firstName} onChange={handleChange} required className={inputClass} placeholder="Іван" />
-        </div>
-        <div>
-          <label className={labelClass}>Прізвище *</label>
-          <input name="lastName" value={form.lastName} onChange={handleChange} required className={inputClass} placeholder="Коваленко" />
-        </div>
-      </div>
+      {restrictedMode ? (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Email</label>
+              <input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="ivan@example.com" />
+            </div>
+            <div>
+              <label className={labelClass}>Телефон</label>
+              <input name="phone" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+380..." />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Telegram</label>
+              <input name="telegram" value={form.telegram} onChange={handleChange} className={inputClass} placeholder="@username" />
+            </div>
+            <div>
+              <label className={labelClass}>Instagram</label>
+              <input name="instagram" value={form.instagram} onChange={handleChange} className={inputClass} placeholder="@username" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Facebook</label>
+              <input name="facebook" value={form.facebook} onChange={handleChange} className={inputClass} placeholder="facebook.com/..." />
+            </div>
+            <div>
+              <label className={labelClass}>Рік навчання</label>
+              <select name="studyYear" value={form.studyYear} onChange={handleChange} className={inputClass}>
+                <option value="">— не вказано —</option>
+                {[1,2,3,4,5,6].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Ім&apos;я *</label>
+              <input name="firstName" value={form.firstName} onChange={handleChange} required className={inputClass} placeholder="Іван" />
+            </div>
+            <div>
+              <label className={labelClass}>Прізвище *</label>
+              <input name="lastName" value={form.lastName} onChange={handleChange} required className={inputClass} placeholder="Коваленко" />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Стать</label>
-          <select name="gender" value={form.gender} onChange={handleChange} className={inputClass}>
-            <option value="">— не вказано —</option>
-            <option value="Male">Чоловіча</option>
-            <option value="Female">Жіноча</option>
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>Рік навчання</label>
-          <select name="studyYear" value={form.studyYear} onChange={handleChange} className={inputClass}>
-            <option value="">— не вказано —</option>
-            {[1,2,3,4,5,6].map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Стать</label>
+              <select name="gender" value={form.gender} onChange={handleChange} className={inputClass}>
+                <option value="">— не вказано —</option>
+                <option value="Male">Чоловіча</option>
+                <option value="Female">Жіноча</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Рік навчання</label>
+              <select name="studyYear" value={form.studyYear} onChange={handleChange} className={inputClass}>
+                <option value="">— не вказано —</option>
+                {[1,2,3,4,5,6].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Дата народження</label>
-          <input type="date" name="birthDate" value={form.birthDate} onChange={handleChange} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>Дата вступу *</label>
-          <input type="date" name="joinedAt" value={form.joinedAt} onChange={handleChange} required className={inputClass} />
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Дата народження</label>
+              <input type="date" name="birthDate" value={form.birthDate} onChange={handleChange} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Дата вступу *</label>
+              <input type="date" name="joinedAt" value={form.joinedAt} onChange={handleChange} required className={inputClass} />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Статус</label>
-          <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
-            <option value="Observer">Observer</option>
-            <option value="Baby">Baby</option>
-            <option value="Full">Full</option>
-            <option value="Alumni">Alumni</option>
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>Стан</label>
-          <select name="state" value={form.state} onChange={handleChange} className={inputClass}>
-            <option value="Active">Активний</option>
-            <option value="Inactive">Неактивний</option>
-          </select>
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Статус</label>
+              <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
+                <option value="Observer">Observer</option>
+                <option value="Baby">Baby</option>
+                <option value="Full">Full</option>
+                <option value="Alumni">Alumni</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Стан</label>
+              <select name="state" value={form.state} onChange={handleChange} className={inputClass}>
+                <option value="Active">Активний</option>
+                <option value="Inactive">Неактивний</option>
+              </select>
+            </div>
+          </div>
 
-      <div>
-        <label className={labelClass}>Ментор</label>
-        <select name="mentorId" value={form.mentorId} onChange={handleChange} className={inputClass}>
-          <option value="">— без ментора —</option>
-          {mentors.map(m => (
-            <option key={m.id} value={m.id}>{m.lastName} {m.firstName}</option>
-          ))}
-        </select>
-      </div>
+          <div>
+            <label className={labelClass}>Ментор</label>
+            <select name="mentorId" value={form.mentorId} onChange={handleChange} className={inputClass}>
+              <option value="">— без ментора —</option>
+              {mentors.map(m => (
+                <option key={m.id} value={m.id}>{m.lastName} {m.firstName}</option>
+              ))}
+            </select>
+          </div>
 
-      <hr className="border-gray-100" />
+          <hr className="border-gray-100" />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Email</label>
-          <input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="ivan@example.com" />
-        </div>
-        <div>
-          <label className={labelClass}>Телефон</label>
-          <input name="phone" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+380..." />
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Email</label>
+              <input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="ivan@example.com" />
+            </div>
+            <div>
+              <label className={labelClass}>Телефон</label>
+              <input name="phone" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+380..." />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Telegram</label>
-          <input name="telegram" value={form.telegram} onChange={handleChange} className={inputClass} placeholder="@username" />
-        </div>
-        <div>
-          <label className={labelClass}>Instagram</label>
-          <input name="instagram" value={form.instagram} onChange={handleChange} className={inputClass} placeholder="@username" />
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Telegram</label>
+              <input name="telegram" value={form.telegram} onChange={handleChange} className={inputClass} placeholder="@username" />
+            </div>
+            <div>
+              <label className={labelClass}>Instagram</label>
+              <input name="instagram" value={form.instagram} onChange={handleChange} className={inputClass} placeholder="@username" />
+            </div>
+          </div>
 
-      <div>
-        <label className={labelClass}>Facebook</label>
-        <input name="facebook" value={form.facebook} onChange={handleChange} className={inputClass} placeholder="facebook.com/..." />
-      </div>
+          <div>
+            <label className={labelClass}>Facebook</label>
+            <input name="facebook" value={form.facebook} onChange={handleChange} className={inputClass} placeholder="facebook.com/..." />
+          </div>
 
-      <div>
-        <label className={labelClass}>Родина (free text)</label>
-        <textarea name="family" value={form.family} onChange={handleChange} className={inputClass} rows={2} placeholder="Опис родини..." />
-      </div>
+          <div>
+            <label className={labelClass}>Родина (free text)</label>
+            <textarea name="family" value={form.family} onChange={handleChange} className={inputClass} rows={2} placeholder="Опис родини..." />
+          </div>
+        </>
+      )}
 
       {error && (
         <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-[6px]">{error}</p>

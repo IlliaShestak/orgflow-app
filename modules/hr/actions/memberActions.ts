@@ -26,13 +26,22 @@ export async function updateMember(input: MemberUpdateInput) {
     const { id, ...data } = memberUpdateSchema.parse(input)
 
     if (role === 'FullMember') {
-      // Full Member can only update own record or own mentees
       const { getMemberByUserId } = await import('../repository/memberRepository')
       const selfMember = await getMemberByUserId(session.user.id)
       if (!selfMember) throw new Error('Unauthorized')
       const isSelf = selfMember.id === id
       const isMentee = selfMember.mentees.some((m: { id: string }) => m.id === id)
       if (!isSelf && !isMentee) throw new Error('Unauthorized')
+      // FullMember can only update contact fields on their own record
+      if (isSelf) {
+        const member = await prisma.member.update({
+          where: { id },
+          data: { email: data.email, phone: data.phone, telegram: data.telegram, instagram: data.instagram, facebook: data.facebook, studyYear: data.studyYear },
+        })
+        revalidatePath('/information-book')
+        revalidatePath(`/information-book/${id}`)
+        return { success: true, data: member }
+      }
     } else if (role !== 'Admin' && role !== 'VP4HR') {
       throw new Error('Unauthorized')
     }

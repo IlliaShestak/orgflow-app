@@ -7,7 +7,7 @@ import { MemberAvatar } from '@/shared/components/MemberAvatar'
 import { MemberEditDialog } from '@/modules/hr/components/MemberEditDialog'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { formatDate } from '@/shared/lib/utils'
-import { ChangePasswordForm } from '@/modules/admin/components/ChangePasswordForm'
+import { ChangePasswordDialog } from '@/modules/admin/components/ChangePasswordDialog'
 import { getKspzTableByStatus } from '@/modules/knowledge/repository/kspzTableRepository'
 import { getCoverageForMember } from '@/modules/knowledge/repository/kspzCoverageRepository'
 import { MemberKspzGrid } from '@/modules/knowledge/components/MemberKspzGrid'
@@ -52,7 +52,6 @@ export default async function ProfilePage({ searchParams }: PageProps) {
     { key: 'teams', label: 'Команди' },
     { key: 'kspz', label: 'КСПЗ' },
     { key: 'history', label: 'Історія подач' },
-    { key: 'security', label: 'Безпека' },
   ]
 
   return (
@@ -72,7 +71,10 @@ export default async function ProfilePage({ searchParams }: PageProps) {
               </div>
             </div>
           </div>
-          <MemberEditDialog member={member} mentors={mentors} />
+          <div className="flex items-center gap-2">
+            <ChangePasswordDialog />
+            <MemberEditDialog member={member} mentors={mentors} restrictedMode={role === 'FullMember'} />
+          </div>
         </div>
       </div>
 
@@ -203,12 +205,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
         </div>
       )}
 
-      {tab === 'security' && (
-        <div className="bg-white border border-gray-100 rounded-[10px] p-6 max-w-md">
-          <h2 className="text-sm font-semibold text-gray-800 mb-4">Зміна пароля</h2>
-          <ChangePasswordForm />
-        </div>
-      )}
+
     </div>
   )
 }
