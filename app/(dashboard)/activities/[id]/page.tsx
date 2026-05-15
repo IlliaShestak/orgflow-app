@@ -6,7 +6,7 @@ import { ActivityTypeBadge } from '@/modules/activities/components/ActivityTypeB
 import { getSession } from '@/shared/lib/auth'
 import { prisma } from '@/shared/lib/prisma'
 import Link from 'next/link'
-import { Role } from '../../../../generated/prisma'
+import { Role } from '@prisma/client'
 
 export default async function ActivityDetailPage({ params }: { params: { id: string } }) {
   const [activity, session] = await Promise.all([

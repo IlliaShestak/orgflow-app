@@ -1,5 +1,5 @@
 import { cn } from '@/shared/lib/utils'
-import { MemberState } from '@/generated/prisma'
+import { MemberState } from '@prisma/client'
 
 interface StateBadgeProps {
   state: MemberState

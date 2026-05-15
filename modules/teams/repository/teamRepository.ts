@@ -1,5 +1,5 @@
-﻿import { prisma } from '@/shared/lib/prisma'
-import { TeamType } from '../../../generated/prisma'
+import { prisma } from '@/shared/lib/prisma'
+import { TeamType } from '@prisma/client'
 import { TeamListItem, TeamWithPositions, MemberForSelect } from '../types'
 
 export async function getTeams(): Promise<TeamListItem[]> {
@@ -78,7 +78,7 @@ export async function deletePosition(id: string) {
     where: { positionId: id, endDate: null },
   })
   if (active) {
-    throw new Error('РќРµРјРѕР¶Р»РёРІРѕ РІРёРґР°Р»РёС‚Рё РїРѕР·РёС†С–СЋ Р· Р°РєС‚РёРІРЅРёРјРё СѓС‡Р°СЃРЅРёРєР°РјРё')
+    throw new Error('Неможливо видалити позицію з активними учасниками')
   }
   return prisma.position.delete({ where: { id } })
 }

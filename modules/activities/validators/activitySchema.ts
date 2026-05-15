@@ -1,10 +1,10 @@
-﻿import { z } from 'zod'
-import { ActivityType } from '@/generated/prisma'
+import { z } from 'zod'
+import { ActivityType } from '@prisma/client'
 
 export const activityCreateSchema = z.object({
   type: z.nativeEnum(ActivityType),
   date: z.coerce.date(),
-  description: z.string().min(1, 'РћРїРёСЃ РѕР±РѕРІКјСЏР·РєРѕРІРёР№'),
+  description: z.string().min(1, 'Опис обовʼязковий'),
 })
 
 export const activityUpdateSchema = activityCreateSchema.extend({
@@ -14,7 +14,7 @@ export const activityUpdateSchema = activityCreateSchema.extend({
 export const agendaItemSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('text'),
-    text: z.string().min(1, 'РўРµРєСЃС‚ РѕР±РѕРІКјСЏР·РєРѕРІРёР№'),
+    text: z.string().min(1, 'Текст обовʼязковий'),
   }),
   z.object({
     kind: z.literal('topic'),

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { MemberStatus } from '@/generated/prisma'
+import { MemberStatus } from '@prisma/client'
 import { createKspzTable } from '../actions/kspzActions'
 
 interface TransferType {

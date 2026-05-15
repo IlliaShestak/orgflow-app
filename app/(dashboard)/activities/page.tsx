@@ -3,7 +3,7 @@ import { ActivityTypeBadge } from '@/modules/activities/components/ActivityTypeB
 import { AddActivityDialog } from '@/modules/activities/components/AddActivityDialog'
 import { getSession } from '@/shared/lib/auth'
 import Link from 'next/link'
-import { Role, ActivityType } from '@/generated/prisma'
+import { Role, ActivityType } from '@prisma/client'
 
 export default async function ActivitiesPage({
   searchParams,

@@ -3,7 +3,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Credentials from 'next-auth/providers/credentials'
 import { prisma } from '@/shared/lib/prisma'
 import { authConfig } from '@/auth.config'
-import { Role } from '@/generated/prisma'
+import { Role } from '@prisma/client'
 import { z } from 'zod'
 
 declare module 'next-auth' {

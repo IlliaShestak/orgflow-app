@@ -40,9 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# generated prisma client (regenerated via `npx prisma generate`)
-/generated
-
 # claude code internal state
 .omc/state/
 .omc/sessions/

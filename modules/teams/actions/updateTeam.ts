@@ -1,11 +1,11 @@
-﻿'use server'
+'use server'
 
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { updateTeamSchema } from '../validators/teamSchema'
 import { updateTeam as updateTeamInDb, archiveTeam as archiveTeamInDb } from '../repository/teamRepository'
-import { TeamType } from '../../../generated/prisma'
+import { TeamType } from '@prisma/client'
 
 export async function updateTeam(formData: FormData) {
   const session = await auth()
@@ -37,7 +37,7 @@ export async function updateTeam(formData: FormData) {
     revalidatePath(`/teams/${parsed.data.id}`)
     return { success: true }
   } catch {
-    return { error: 'РџРѕРјРёР»РєР° РїСЂРё РѕРЅРѕРІР»РµРЅРЅС– РєРѕРјР°РЅРґРё' }
+    return { error: 'Помилка при оновленні команди' }
   }
 }
 
@@ -52,6 +52,6 @@ export async function archiveTeam(teamId: string) {
     revalidatePath('/teams')
     return { success: true }
   } catch {
-    return { error: 'РџРѕРјРёР»РєР° РїСЂРё Р°СЂС…С–РІСѓРІР°РЅРЅС– РєРѕРјР°РЅРґРё' }
+    return { error: 'Помилка при архівуванні команди' }
   }
 }

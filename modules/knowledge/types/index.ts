@@ -1,4 +1,4 @@
-import { MemberStatus } from '@/generated/prisma'
+import { MemberStatus } from '@prisma/client'
 
 export type { MemberStatus }
 

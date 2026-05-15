@@ -2,7 +2,7 @@ import { getKspzTables, getKspzTransferTypes } from '@/modules/knowledge/reposit
 import { AddKspzTableDialog } from '@/modules/knowledge/components/AddKspzTableDialog'
 import { getSession } from '@/shared/lib/auth'
 import Link from 'next/link'
-import { Role, MemberStatus } from '@/generated/prisma'
+import { Role, MemberStatus } from '@prisma/client'
 
 const statusLabels: Record<MemberStatus, string> = {
   Observer: 'Observer',

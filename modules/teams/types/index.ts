@@ -1,4 +1,4 @@
-﻿import { TeamType } from '../../../generated/prisma'
+import { TeamType } from '@prisma/client'
 
 export type TeamWithPositions = {
   id: string

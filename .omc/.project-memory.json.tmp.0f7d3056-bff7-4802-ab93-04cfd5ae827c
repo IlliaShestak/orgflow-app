@@ -1,0 +1,499 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1778744258695,
+  "projectRoot": "C:\\Users\\illya\\Documents\\drive_copy\\lpnu\\DIPLOM\\orgflow-app",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.2.6",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.2.4",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.2.4",
+        "category": "frontend"
+      },
+      {
+        "name": "@playwright/test",
+        "version": "1.60.0",
+        "category": "testing"
+      },
+      {
+        "name": "vitest",
+        "version": "4.1.6",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint",
+      "test": "vitest",
+      "test:run": "vitest run",
+      "test:coverage": "vitest run --coverage",
+      "test:e2e": "playwright test"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "app",
+      "public"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1778744258499,
+      "keyFiles": [
+        "favicon.ico",
+        "globals.css",
+        "layout.tsx",
+        "page.tsx"
+      ]
+    },
+    "e2e": {
+      "path": "e2e",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778744258501,
+      "keyFiles": []
+    },
+    "generated": {
+      "path": "generated",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778744258521,
+      "keyFiles": []
+    },
+    "modules": {
+      "path": "modules",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778744258522,
+      "keyFiles": []
+    },
+    "prisma": {
+      "path": "prisma",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1778744258523,
+      "keyFiles": [
+        "schema.prisma",
+        "seed.ts"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 5,
+      "lastAccessed": 1778744258524,
+      "keyFiles": [
+        "file.svg",
+        "globe.svg",
+        "next.svg",
+        "vercel.svg",
+        "window.svg"
+      ]
+    },
+    "shared": {
+      "path": "shared",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778744258524,
+      "keyFiles": []
+    },
+    "app\\api": {
+      "path": "app\\api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1778744258525,
+      "keyFiles": []
+    },
+    "prisma\\migrations": {
+      "path": "prisma\\migrations",
+      "purpose": "Database migrations",
+      "fileCount": 1,
+      "lastAccessed": 1778744258528,
+      "keyFiles": [
+        "migration_lock.toml"
+      ]
+    },
+    "shared\\components": {
+      "path": "shared\\components",
+      "purpose": "UI components",
+      "fileCount": 8,
+      "lastAccessed": 1778744258529,
+      "keyFiles": [
+        "ConfirmDialog.tsx",
+        "EmptyState.tsx",
+        "LoadingSpinner.tsx"
+      ]
+    },
+    "shared\\lib": {
+      "path": "shared\\lib",
+      "purpose": "Library code",
+      "fileCount": 3,
+      "lastAccessed": 1778744258530,
+      "keyFiles": [
+        "auth.ts",
+        "prisma.ts",
+        "utils.ts"
+      ]
+    },
+    "shared\\types": {
+      "path": "shared\\types",
+      "purpose": "Type definitions",
+      "fileCount": 0,
+      "lastAccessed": 1778744258531,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "app\\(dashboard)\\information-book\\[id]\\page.tsx",
+      "accessCount": 11,
+      "lastAccessed": 1778757489190,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\information-book\\page.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1778757441200,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 6,
+      "lastAccessed": 1778757453460,
+      "type": "directory"
+    },
+    {
+      "path": "shared\\lib\\prisma.ts",
+      "accessCount": 5,
+      "lastAccessed": 1778757289894,
+      "type": "file"
+    },
+    {
+      "path": "auth.ts",
+      "accessCount": 5,
+      "lastAccessed": 1778757351717,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\types\\index.ts",
+      "accessCount": 4,
+      "lastAccessed": 1778757321397,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\repository\\memberRepository.ts",
+      "accessCount": 4,
+      "lastAccessed": 1778757323851,
+      "type": "file"
+    },
+    {
+      "path": "shared\\lib\\auth.ts",
+      "accessCount": 4,
+      "lastAccessed": 1778757347690,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\validators\\memberSchema.ts",
+      "accessCount": 4,
+      "lastAccessed": 1778757369815,
+      "type": "file"
+    },
+    {
+      "path": "modules\\teams\\actions\\updateTeam.ts",
+      "accessCount": 3,
+      "lastAccessed": 1778757662790,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\actions\\createUser.ts",
+      "accessCount": 3,
+      "lastAccessed": 1778757666159,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\profile\\page.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1778757808414,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 2,
+      "lastAccessed": 1778745450810,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\types\\index.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778756983119,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\validators\\adminSchema.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778756983854,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\repository\\adminRepository.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778756987513,
+      "type": "file"
+    },
+    {
+      "path": "prisma\\schema.prisma",
+      "accessCount": 2,
+      "lastAccessed": 1778757009844,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\actions\\memberActions.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778757028499,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\admin\\users\\page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778757168543,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\admin\\references\\page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778757181626,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\activities\\page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778757191174,
+      "type": "file"
+    },
+    {
+      "path": "tsconfig.json",
+      "accessCount": 2,
+      "lastAccessed": 1778757266897,
+      "type": "file"
+    },
+    {
+      "path": "modules",
+      "accessCount": 2,
+      "lastAccessed": 1778757461212,
+      "type": "directory"
+    },
+    {
+      "path": "modules\\admin\\actions\\createTransferType.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778757465576,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\actions\\updateTransferType.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778757467206,
+      "type": "file"
+    },
+    {
+      "path": "modules\\teams\\actions\\managePositions.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778757477811,
+      "type": "file"
+    },
+    {
+      "path": "modules\\activities\\components\\AgendaEditor.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778757810909,
+      "type": "file"
+    },
+    {
+      "path": "generated\\prisma\\models.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778745431115,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\repository\\referenceRepository.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778745490527,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberForm.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778745513455,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberTable.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778745518840,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberKanbanCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778756914541,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberKanbanBoard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778756925696,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberFilters.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778756933349,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\AddMemberDialog.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778756947521,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\ViewToggle.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778756957130,
+      "type": "file"
+    },
+    {
+      "path": "app",
+      "accessCount": 1,
+      "lastAccessed": 1778757006657,
+      "type": "directory"
+    },
+    {
+      "path": "shared\\components\\ConfirmDialog.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778757010624,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\activities\\[id]\\page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778757019326,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberEditDialog.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778757039776,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\actions\\deleteUser.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757044775,
+      "type": "file"
+    },
+    {
+      "path": "modules\\activities\\types\\index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757048680,
+      "type": "file"
+    },
+    {
+      "path": "modules\\activities\\validators\\activitySchema.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757050940,
+      "type": "file"
+    },
+    {
+      "path": "modules\\activities\\repository\\activityRepository.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757061047,
+      "type": "file"
+    },
+    {
+      "path": "modules\\admin\\actions\\deleteTransferType.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757064586,
+      "type": "file"
+    },
+    {
+      "path": "modules\\activities\\components\\AttendancePanel.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778757163315,
+      "type": "file"
+    },
+    {
+      "path": "shared\\components\\EmptyState.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778757191008,
+      "type": "file"
+    },
+    {
+      "path": "modules\\knowledge\\repository\\kspzTableRepository.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757242515,
+      "type": "file"
+    },
+    {
+      "path": "modules\\knowledge\\repository\\kspzTopicRepository.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757247018,
+      "type": "file"
+    },
+    {
+      "path": "modules\\knowledge\\repository\\kspzCoverageRepository.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778757252020,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

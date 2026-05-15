@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireRole, getSession } from '@/shared/lib/auth'
 import { prisma } from '@/shared/lib/prisma'
-import { Role } from '@/generated/prisma'
+import { Role } from '@prisma/client'
 import {
   kspzTableCreateSchema,
   kspzTableUpdateSchema,

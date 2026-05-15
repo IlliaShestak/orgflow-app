@@ -1,11 +1,11 @@
-﻿'use server'
+'use server'
 
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createTeamSchema } from '../validators/teamSchema'
 import { createTeam as createTeamInDb } from '../repository/teamRepository'
-import { TeamType } from '../../../generated/prisma'
+import { TeamType } from '@prisma/client'
 
 export async function createTeam(formData: FormData) {
   const session = await auth()
@@ -35,6 +35,6 @@ export async function createTeam(formData: FormData) {
     revalidatePath('/teams')
     return { success: true, id: team.id }
   } catch {
-    return { error: 'РџРѕРјРёР»РєР° РїСЂРё СЃС‚РІРѕСЂРµРЅРЅС– РєРѕРјР°РЅРґРё' }
+    return { error: 'Помилка при створенні команди' }
   }
 }

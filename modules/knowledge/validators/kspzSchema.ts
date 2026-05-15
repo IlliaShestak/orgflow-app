@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MemberStatus } from '@/generated/prisma'
+import { MemberStatus } from '@prisma/client'
 
 export const kspzTableCreateSchema = z.object({
   name: z.string().min(1, 'Назва обов\'язкова'),
