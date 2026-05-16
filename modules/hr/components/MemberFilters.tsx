@@ -34,7 +34,7 @@ export function MemberFilters() {
         placeholder="Пошук за ім'ям..."
         defaultValue={searchParams.get('search') ?? ''}
         onChange={e => handleChange('search', e.target.value)}
-        className="px-3 py-2 text-xs border border-gray-200 rounded-[7px] focus:outline-none focus:border-[#0A3D91] transition-colors w-48"
+        className="px-3 py-2 text-xs border border-gray-300 rounded-[7px] bg-white focus:outline-none focus:border-[#0A3D91] transition-colors w-72"
       />
       <select
         defaultValue={searchParams.get('status') ?? ''}

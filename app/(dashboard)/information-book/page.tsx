@@ -39,6 +39,7 @@ export default async function InformationBookPage({ searchParams }: PageProps) {
 
   // Stats
   const counts = {
+    total: members.length,
     Observer: members.filter((m) => m.status === 'Observer').length,
     Baby: members.filter((m) => m.status === 'Baby').length,
     Full: members.filter((m) => m.status === 'Full').length,
@@ -57,7 +58,11 @@ export default async function InformationBookPage({ searchParams }: PageProps) {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
+        <div className="bg-white rounded-[10px] border-t-[3px] border-gray-800 p-5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3px] text-gray-400">{'Всього'}</p>
+          <p className="text-[32px] font-bold tracking-[-1px] text-gray-800">{counts.total}</p>
+        </div>
         <div className="bg-white rounded-[10px] border-t-[3px] border-[#0A3D91] p-5">
           <p className="text-[11px] font-medium uppercase tracking-[0.3px] text-gray-400">Observer</p>
           <p className="text-[32px] font-bold tracking-[-1px] text-[#0A3D91]">{counts.Observer}</p>

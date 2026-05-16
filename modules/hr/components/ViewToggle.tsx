@@ -40,7 +40,7 @@ export function ViewToggle({ currentView }: ViewToggleProps) {
             : 'text-gray-400 hover:text-gray-600'
         )}
       >
-        Kanban
+        Дошка
       </button>
     </div>
   )
