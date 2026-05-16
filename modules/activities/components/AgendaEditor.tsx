@@ -1,11 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { saveAgenda } from '../actions/activityActions'
-import type { AgendaItem } from '../types'
 
 interface KnowledgeTopic {
   id: string
@@ -13,150 +10,209 @@ interface KnowledgeTopic {
   knowledgeTable: { name: string }
 }
 
-interface AgendaEditorProps {
-  activityId: string
-  initialItems: AgendaItem[]
-  availableTopics: KnowledgeTopic[]
-}
-
-type DraftItem = {
+export interface DraftItem {
   id?: string
   kind: 'text' | 'topic'
   text: string
   knowledgeTopicId: string | null
+  topicName?: string
+  tableName?: string
 }
 
-export function AgendaEditor({ activityId, initialItems, availableTopics }: AgendaEditorProps) {
-  const [items, setItems] = useState<DraftItem[]>(
-    initialItems.map((item) => ({
-      id: item.id,
-      kind: item.knowledgeTopicId ? 'topic' : 'text',
-      text: item.text ?? '',
-      knowledgeTopicId: item.knowledgeTopicId,
-    }))
+interface AgendaEditorProps {
+  items: DraftItem[]
+  onItemsChange: (items: DraftItem[]) => void
+  availableTopics: KnowledgeTopic[]
+}
+
+export function AgendaEditor({ items, onItemsChange, availableTopics }: AgendaEditorProps) {
+  const [newTextItem, setNewTextItem] = useState('')
+  const [topicSearch, setTopicSearch] = useState('')
+  const [selectedTable, setSelectedTable] = useState('')
+
+  const addedTopicIds = new Set(
+    items.filter((i) => i.kind === 'topic').map((i) => i.knowledgeTopicId!)
   )
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
 
-  function addText() {
-    setItems((prev) => [...prev, { kind: 'text', text: '', knowledgeTopicId: null }])
-  }
+  const tables = [...new Set(availableTopics.map((t) => t.knowledgeTable.name))].sort()
 
-  function addTopic() {
-    setItems((prev) => [...prev, { kind: 'topic', text: '', knowledgeTopicId: null }])
-  }
+  const filteredTopics = availableTopics.filter((t) => {
+    if (addedTopicIds.has(t.id)) return false
+    if (selectedTable && t.knowledgeTable.name !== selectedTable) return false
+    const q = topicSearch.toLowerCase()
+    if (!q) return true
+    return t.name.toLowerCase().includes(q) || t.knowledgeTable.name.toLowerCase().includes(q)
+  })
 
   function removeItem(index: number) {
-    setItems((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  function updateItem(index: number, patch: Partial<DraftItem>) {
-    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)))
+    onItemsChange(items.filter((_, i) => i !== index))
   }
 
   function moveUp(index: number) {
     if (index === 0) return
-    setItems((prev) => {
-      const next = [...prev]
-      ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
-      return next
-    })
+    const next = [...items]
+    ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+    onItemsChange(next)
   }
 
   function moveDown(index: number) {
     if (index === items.length - 1) return
-    setItems((prev) => {
-      const next = [...prev]
-      ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
-      return next
-    })
+    const next = [...items]
+    ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+    onItemsChange(next)
   }
 
-  function handleSave() {
-    setError(null)
-    setSaved(false)
-    startTransition(async () => {
-      const result = await saveAgenda({
-        activityId,
-        items: items.map((item, i) => ({
-          id: item.id,
-          order: i,
-          text: item.kind === 'text' ? item.text : null,
-          knowledgeTopicId: item.kind === 'topic' ? item.knowledgeTopicId : null,
-        })),
-      })
-      if (result.success) {
-        setSaved(true)
-      } else {
-        setError(result.error ?? 'Помилка')
-      }
-    })
+  function addTextItem() {
+    const text = newTextItem.trim()
+    if (!text) return
+    onItemsChange([...items, { kind: 'text', text, knowledgeTopicId: null }])
+    setNewTextItem('')
+  }
+
+  function addTopicItem(topic: KnowledgeTopic) {
+    onItemsChange([
+      ...items,
+      {
+        kind: 'topic',
+        text: '',
+        knowledgeTopicId: topic.id,
+        topicName: topic.name,
+        tableName: topic.knowledgeTable.name,
+      },
+    ])
   }
 
   return (
     <div className="space-y-3">
-      <div className="space-y-2">
+      {/* Items list */}
+      <div className="space-y-1.5">
         {items.length === 0 && (
-          <p className="text-xs text-gray-400 text-center py-4">Порядок денний порожній</p>
+          <p className="text-xs text-gray-400 text-center py-3">Агенда порожня</p>
         )}
         {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-2 bg-[#F7F8FA] rounded-[8px] px-3 py-2">
+          <div
+            key={index}
+            className="flex items-center gap-2 bg-[#F7F8FA] rounded-[8px] px-3 py-2"
+          >
             <span className="text-[11px] text-gray-400 w-5 shrink-0">{index + 1}</span>
-
-            {item.kind === 'text' ? (
-              <Input
-                value={item.text}
-                onChange={(e) => updateItem(index, { text: e.target.value })}
-                placeholder="Текст пункту..."
-                className="flex-1 h-8 text-sm"
-              />
-            ) : (
-              <Select
-                value={item.knowledgeTopicId ?? ''}
-                onValueChange={(v) => updateItem(index, { knowledgeTopicId: v })}
+            <div className="flex-1 min-w-0">
+              {item.kind === 'topic' ? (
+                <span className="text-sm text-gray-700">
+                  <span className="text-[11px] text-[#0B7B45] font-medium mr-1">[КСПЗ]</span>
+                  {item.tableName} — {item.topicName}
+                </span>
+              ) : (
+                <span className="text-sm text-gray-700 truncate block">{item.text}</span>
+              )}
+            </div>
+            <div className="flex gap-0.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => moveUp(index)}
+                disabled={index === 0}
+                className="text-gray-300 hover:text-gray-600 disabled:opacity-25 text-xs w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100"
               >
-                <SelectTrigger className="flex-1 h-8 text-sm">
-                  <SelectValue placeholder="Оберіть тему КСПЗ..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTopics.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.knowledgeTable.name} — {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            <div className="flex gap-1 shrink-0">
-              <button onClick={() => moveUp(index)} className="text-gray-400 hover:text-gray-600 text-xs px-1">↑</button>
-              <button onClick={() => moveDown(index)} className="text-gray-400 hover:text-gray-600 text-xs px-1">↓</button>
-              <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600 text-xs px-1">✕</button>
+                ↑
+              </button>
+              <button
+                type="button"
+                onClick={() => moveDown(index)}
+                disabled={index === items.length - 1}
+                className="text-gray-300 hover:text-gray-600 disabled:opacity-25 text-xs w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => removeItem(index)}
+                className="text-gray-300 hover:text-red-500 text-xs w-6 h-6 flex items-center justify-center rounded hover:bg-red-50"
+              >
+                ✕
+              </button>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Add text item */}
       <div className="flex gap-2">
-        <Button type="button" variant="outline" onClick={addText} className="text-xs h-8">
-          + Текст
-        </Button>
-        <Button type="button" variant="outline" onClick={addTopic} className="text-xs h-8">
-          + Тема КСПЗ
-        </Button>
-        <div className="flex-1" />
-        {saved && <span className="text-xs text-[#0B7B45] self-center">Збережено</span>}
-        {error && <span className="text-xs text-red-500 self-center">{error}</span>}
+        <Input
+          value={newTextItem}
+          onChange={(e) => setNewTextItem(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              addTextItem()
+            }
+          }}
+          placeholder="Новий текстовий пункт агенди..."
+          className="flex-1 h-8 text-sm"
+        />
         <Button
           type="button"
-          onClick={handleSave}
-          disabled={isPending}
-          className="bg-[#E85D04] hover:bg-[#F4845F] text-white text-xs rounded-[7px] h-8"
+          variant="outline"
+          onClick={addTextItem}
+          disabled={!newTextItem.trim()}
+          className="text-xs h-8 shrink-0"
         >
-          {isPending ? 'Збереження...' : 'Зберегти порядок денний'}
+          Додати
         </Button>
       </div>
+
+      {/* Topic picker */}
+      {availableTopics.length > 0 && (
+        <div className="border border-gray-100 rounded-[8px] overflow-hidden">
+          <div className="px-3 py-2 bg-[#F7F8FA] border-b border-gray-100">
+            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.6px]">
+              Додати тему КСПЗ
+            </p>
+          </div>
+          <div className="p-3 space-y-2">
+            <div className="flex gap-2">
+              <select
+                value={selectedTable}
+                onChange={(e) => setSelectedTable(e.target.value)}
+                className="h-8 text-xs border border-gray-200 rounded-[6px] px-2 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#E85D04] min-w-[130px]"
+              >
+                <option value="">Усі таблиці</option>
+                {tables.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+              <Input
+                value={topicSearch}
+                onChange={(e) => setTopicSearch(e.target.value)}
+                placeholder="Пошук теми..."
+                className="flex-1 h-8 text-sm"
+              />
+            </div>
+            <div className="max-h-36 overflow-y-auto border border-gray-100 rounded-[6px]">
+              {filteredTopics.length === 0 ? (
+                <p className="px-3 py-3 text-xs text-gray-400 text-center">
+                  {addedTopicIds.size === availableTopics.length
+                    ? 'Всі теми вже додано'
+                    : 'Теми не знайдено'}
+                </p>
+              ) : (
+                filteredTopics.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => addTopicItem(t)}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-[#E6F5EE] transition-colors border-b border-gray-50 last:border-0"
+                  >
+                    <span className="text-[#0B7B45] font-medium">{t.knowledgeTable.name}</span>
+                    <span className="text-gray-400 mx-1">—</span>
+                    {t.name}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

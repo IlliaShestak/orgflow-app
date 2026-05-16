@@ -41,6 +41,8 @@ export default async function ActivitiesPage({
     LeisureEvent: 'Leisure Event',
   }
 
+  const now = new Date()
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -115,38 +117,59 @@ export default async function ActivitiesPage({
               </tr>
             </thead>
             <tbody>
-              {activities.map((activity) => (
-                <tr
-                  key={activity.id}
-                  className="border-t border-gray-100 hover:bg-[#FAFBFD] transition-colors"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/activities/${activity.id}`}
-                      className="text-sm font-medium text-gray-800 hover:text-[#E85D04]"
-                    >
-                      {activity.name}
-                    </Link>
-                    {activity.description && (
-                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
-                        {activity.description}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ActivityTypeBadge type={activity.type} />
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                    {new Date(activity.date).toLocaleDateString('uk-UA')}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {activity._count.attendance}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {activity._count.agendaItems}
-                  </td>
-                </tr>
-              ))}
+              {activities.map((activity) => {
+                const isUpcoming = new Date(activity.date) > now
+                return (
+                  <tr
+                    key={activity.id}
+                    className={`border-t border-gray-100 transition-colors ${
+                      isUpcoming
+                        ? 'bg-[#F2FBF6] hover:bg-[#E8F8EF]'
+                        : 'hover:bg-[#FAFBFD]'
+                    }`}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {isUpcoming && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#0B7B45] shrink-0" />
+                        )}
+                        <div>
+                          <Link
+                            href={`/activities/${activity.id}`}
+                            className="text-sm font-medium text-gray-800 hover:text-[#E85D04]"
+                          >
+                            {activity.name}
+                          </Link>
+                          {activity.description && (
+                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+                              {activity.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <ActivityTypeBadge type={activity.type} />
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        {new Date(activity.date).toLocaleDateString('uk-UA')}
+                        {isUpcoming && (
+                          <span className="px-2 py-0.5 bg-[#0B7B45] text-white text-[10px] font-semibold rounded-[4px] whitespace-nowrap">
+                            Майбутній
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {activity._count.attendance}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {activity._count.agendaItems}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

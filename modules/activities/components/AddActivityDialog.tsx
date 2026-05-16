@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ActivityType } from '@prisma/client'
+import { AgendaEditor, type DraftItem } from './AgendaEditor'
 import { createActivity } from '../actions/activityActions'
 
 interface KnowledgeTopic {
@@ -27,10 +28,6 @@ interface AddActivityDialogProps {
   availableMembers: Member[]
 }
 
-type DraftAgendaItem =
-  | { localId: string; kind: 'text'; text: string }
-  | { localId: string; kind: 'topic'; topicId: string; topicName: string; tableName: string }
-
 const typeLabels: Record<ActivityType, string> = {
   Gathering: 'Gathering',
   SIT: 'SIT',
@@ -42,24 +39,22 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  const [name, setName] = useState('')
   const [type, setType] = useState<ActivityType | ''>('')
-  const [agendaItems, setAgendaItems] = useState<DraftAgendaItem[]>([])
-  const [topicSearch, setTopicSearch] = useState('')
-  const [newTextItem, setNewTextItem] = useState('')
-  const [showAgenda, setShowAgenda] = useState(false)
+  const [date, setDate] = useState('')
+  const [description, setDescription] = useState('')
+  const [agendaItems, setAgendaItems] = useState<DraftItem[]>([])
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
   const [memberSearch, setMemberSearch] = useState('')
-  const [showAttendance, setShowAttendance] = useState(false)
 
   function resetForm() {
+    setName('')
     setType('')
+    setDate('')
+    setDescription('')
     setAgendaItems([])
-    setTopicSearch('')
-    setNewTextItem('')
-    setShowAgenda(false)
     setSelectedMemberIds([])
     setMemberSearch('')
-    setShowAttendance(false)
     setError(null)
   }
 
@@ -68,54 +63,18 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
     if (!val) resetForm()
   }
 
-  function addTopicItem(topic: KnowledgeTopic) {
-    setAgendaItems((prev) => [
-      ...prev,
-      {
-        localId: Math.random().toString(36).slice(2),
-        kind: 'topic',
-        topicId: topic.id,
-        topicName: topic.name,
-        tableName: topic.knowledgeTable.name,
-      },
-    ])
-  }
-
-  function addTextItem() {
-    const text = newTextItem.trim()
-    if (!text) return
-    setAgendaItems((prev) => [
-      ...prev,
-      { localId: Math.random().toString(36).slice(2), kind: 'text', text },
-    ])
-    setNewTextItem('')
-  }
-
-  function removeAgendaItem(localId: string) {
-    setAgendaItems((prev) => prev.filter((i) => i.localId !== localId))
-  }
-
   function toggleMember(memberId: string) {
     setSelectedMemberIds((prev) =>
       prev.includes(memberId) ? prev.filter((id) => id !== memberId) : [...prev, memberId]
     )
   }
 
-  const addedTopicIds = new Set(
-    agendaItems.filter((i): i is Extract<DraftAgendaItem, { kind: 'topic' }> => i.kind === 'topic').map((i) => i.topicId)
-  )
   const selectedMemberSet = new Set(selectedMemberIds)
-
-  const filteredTopics = availableTopics.filter((t) => {
-    if (addedTopicIds.has(t.id)) return false
-    const q = topicSearch.toLowerCase()
-    return t.name.toLowerCase().includes(q) || t.knowledgeTable.name.toLowerCase().includes(q)
-  })
 
   const filteredMembers = availableMembers.filter((m) => {
     if (selectedMemberSet.has(m.id)) return false
     const q = memberSearch.toLowerCase()
-    return `${m.lastName} ${m.firstName}`.toLowerCase().includes(q)
+    return !q || `${m.lastName} ${m.firstName}`.toLowerCase().includes(q)
   })
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -124,23 +83,19 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
       setError('Оберіть тип заходу')
       return
     }
-    const fd = new FormData(e.currentTarget)
-    const name = (fd.get('name') as string).trim()
-    const date = fd.get('date') as string
-    const rawDesc = (fd.get('description') as string).trim()
-    const description = rawDesc || undefined
+    if (!name.trim() || !date) return
 
     setError(null)
     startTransition(async () => {
       const result = await createActivity({
-        name,
+        name: name.trim(),
         type: type as ActivityType,
         date: new Date(date),
-        description,
+        description: description.trim() || undefined,
         agendaItems: agendaItems.map((item) =>
           item.kind === 'text'
             ? { kind: 'text' as const, text: item.text }
-            : { kind: 'topic' as const, knowledgeTopicId: item.topicId }
+            : { kind: 'topic' as const, knowledgeTopicId: item.knowledgeTopicId! }
         ),
         memberIds: selectedMemberIds,
       })
@@ -161,183 +116,122 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
       >
         {'+ Додати захід'}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{'Новий захід'}</DialogTitle>
+
+      <DialogContent className="max-w-[920px] sm:max-w-[920px] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0">
+        <DialogHeader className="px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+          <DialogTitle className="text-base">{'Новий захід'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="name">{'Назва'}</Label>
-            <Input id="name" name="name" placeholder="Назва заходу..." required />
-          </div>
 
-          {/* Type + Date */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{'Тип'}</Label>
-              <Select value={type} onValueChange={(v) => setType(v as ActivityType)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Оберіть тип" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(typeLabels).map(([val, label]) => (
-                    <SelectItem key={val} value={val}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="date">{'Дата'}</Label>
-              <Input id="date" name="date" type="date" required />
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          {/* Two-column body */}
+          <div className="flex flex-1 min-h-0 divide-x divide-gray-100">
 
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="description">
-              {'Опис'}
-              <span className="text-gray-400 text-[11px] ml-1.5">{'(необовʼязково)'}</span>
-            </Label>
-            <Textarea id="description" name="description" placeholder="Опис заходу..." rows={2} />
-          </div>
+            {/* ── Left column: basic info ── */}
+            <div className="w-[360px] shrink-0 overflow-y-auto px-6 py-5 space-y-4">
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.8px]">
+                {'Основна інформація'}
+              </p>
 
-          {/* Agenda section */}
-          <div className="border border-gray-100 rounded-[8px] overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowAgenda((p) => !p)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-[#F7F8FA] text-left text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <span>
-                {'Порядок денний'}
-                <span className="text-gray-400 text-[11px] ml-1.5">{'(необовʼязково)'}</span>
-                {agendaItems.length > 0 && (
-                  <span className="ml-2 text-[11px] text-[#E85D04] font-semibold">
-                    {agendaItems.length} пунктів
-                  </span>
-                )}
-              </span>
-              <span className="text-gray-400 text-[10px]">{showAgenda ? '▲' : '▼'}</span>
-            </button>
+              <div className="space-y-1.5">
+                <Label htmlFor="add-name" className="text-xs text-gray-600">
+                  {'Назва'}
+                </Label>
+                <Input
+                  id="add-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Назва заходу..."
+                  required
+                  className="h-9"
+                />
+              </div>
 
-            {showAgenda && (
-              <div className="p-4 space-y-3">
-                {/* Added items */}
-                {agendaItems.length > 0 && (
-                  <div className="space-y-1">
-                    {agendaItems.map((item, i) => (
-                      <div
-                        key={item.localId}
-                        className="flex items-center gap-2 px-3 py-2 bg-[#F7F8FA] rounded-[7px]"
-                      >
-                        <span className="text-[11px] text-gray-400 w-5 shrink-0">{i + 1}</span>
-                        {item.kind === 'topic' ? (
-                          <span className="flex-1 text-sm text-gray-700 min-w-0">
-                            <span className="text-[11px] text-[#0B7B45] font-medium mr-1">
-                              {'[КСПЗ]'}
-                            </span>
-                            {item.tableName} — {item.topicName}
-                          </span>
-                        ) : (
-                          <span className="flex-1 text-sm text-gray-700 min-w-0 truncate">
-                            {item.text}
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => removeAgendaItem(item.localId)}
-                          className="text-red-400 hover:text-red-600 text-xs shrink-0 ml-1"
-                        >
-                          {'✕'}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add text item */}
-                <div className="flex gap-2">
-                  <Input
-                    value={newTextItem}
-                    onChange={(e) => setNewTextItem(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        addTextItem()
-                      }
-                    }}
-                    placeholder="Текстовий пункт..."
-                    className="flex-1 h-8 text-sm"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addTextItem}
-                    className="text-xs h-8 shrink-0"
-                  >
-                    {'+ Текст'}
-                  </Button>
-                </div>
-
-                {/* Topic search + list */}
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
+                  <Label className="text-xs text-gray-600">{'Тип'}</Label>
+                  <Select value={type} onValueChange={(v) => setType(v as ActivityType)}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Оберіть тип" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(typeLabels).map(([val, label]) => (
+                        <SelectItem key={val} value={val}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="add-date" className="text-xs text-gray-600">
+                    {'Дата'}
+                  </Label>
                   <Input
-                    value={topicSearch}
-                    onChange={(e) => setTopicSearch(e.target.value)}
-                    placeholder="Пошук теми КСПЗ..."
-                    className="h-8 text-sm"
+                    id="add-date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                    className="h-9"
                   />
-                  <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-[7px]">
-                    {filteredTopics.length === 0 ? (
-                      <p className="px-3 py-3 text-xs text-gray-400 text-center">
-                        {availableTopics.length === 0 ? 'Теми КСПЗ відсутні' : 'Теми не знайдено'}
-                      </p>
-                    ) : (
-                      filteredTopics.map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => addTopicItem(t)}
-                          className="w-full text-left px-3 py-2 text-xs hover:bg-[#E6F5EE] transition-colors border-b border-gray-50 last:border-0"
-                        >
-                          <span className="text-[#0B7B45] font-medium">{t.knowledgeTable.name}</span>
-                          <span className="text-gray-400 mx-1">{'—'}</span>
-                          {t.name}
-                        </button>
-                      ))
-                    )}
-                  </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Attendance section */}
-          {availableMembers.length > 0 && (
-            <div className="border border-gray-100 rounded-[8px] overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setShowAttendance((p) => !p)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-[#F7F8FA] text-left text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                <span>
-                  {'Відвідуваність'}
-                  <span className="text-gray-400 text-[11px] ml-1.5">{'(необовʼязково)'}</span>
-                  {selectedMemberIds.length > 0 && (
-                    <span className="ml-2 text-[11px] text-[#E85D04] font-semibold">
-                      {selectedMemberIds.length} учасників
+              <div className="space-y-1.5">
+                <Label htmlFor="add-desc" className="text-xs text-gray-600">
+                  {'Опис'}{' '}
+                  <span className="text-gray-400 font-normal">{'(необовʼязково)'}</span>
+                </Label>
+                <Textarea
+                  id="add-desc"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Опис заходу..."
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+
+            {/* ── Right column: agenda + attendance ── */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+              {/* Agenda */}
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.8px] whitespace-nowrap">
+                    {'Агенда'}
+                  </p>
+                  <span className="text-[10px] text-gray-400">
+                    {agendaItems.length > 0 ? `${agendaItems.length} пунктів` : '(необовʼязково)'}
+                  </span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+                <AgendaEditor
+                  items={agendaItems}
+                  onItemsChange={setAgendaItems}
+                  availableTopics={availableTopics}
+                />
+              </div>
+
+              {/* Attendance */}
+              {availableMembers.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.8px] whitespace-nowrap">
+                      {'Відвідуваність'}
+                    </p>
+                    <span className="text-[10px] text-gray-400">
+                      {selectedMemberIds.length > 0
+                        ? `${selectedMemberIds.length} учасників`
+                        : '(необовʼязково)'}
                     </span>
-                  )}
-                </span>
-                <span className="text-gray-400 text-[10px]">{showAttendance ? '▲' : '▼'}</span>
-              </button>
+                    <div className="flex-1 h-px bg-gray-100" />
+                  </div>
 
-              {showAttendance && (
-                <div className="p-4 space-y-3">
-                  {/* Selected member chips */}
+                  {/* Selected chips */}
                   {selectedMemberIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 mb-3">
                       {selectedMemberIds.map((id) => {
                         const m = availableMembers.find((m) => m.id === id)
                         if (!m) return null
@@ -352,7 +246,7 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
                               onClick={() => toggleMember(id)}
                               className="hover:text-red-500 ml-0.5 leading-none"
                             >
-                              {'×'}
+                              ×
                             </button>
                           </span>
                         )
@@ -360,12 +254,11 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
                     </div>
                   )}
 
-                  {/* Member search + list */}
                   <Input
                     value={memberSearch}
                     onChange={(e) => setMemberSearch(e.target.value)}
                     placeholder="Пошук учасника..."
-                    className="h-8 text-sm"
+                    className="h-8 text-sm mb-1.5"
                   />
                   <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-[7px]">
                     {filteredMembers.length === 0 ? (
@@ -390,26 +283,28 @@ export function AddActivityDialog({ availableTopics, availableMembers }: AddActi
                 </div>
               )}
             </div>
-          )}
+          </div>
 
-          {error && <p className="text-red-500 text-xs">{error}</p>}
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              className="text-xs"
-            >
-              {'Скасувати'}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="bg-[#E85D04] hover:bg-[#F4845F] text-white text-xs rounded-[7px]"
-            >
-              {isPending ? 'Збереження...' : 'Зберегти'}
-            </Button>
+          {/* ── Sticky footer ── */}
+          <div className="shrink-0 border-t border-gray-100 px-6 py-4 bg-white flex items-center justify-between gap-3">
+            <div>{error && <p className="text-red-500 text-xs">{error}</p>}</div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                className="text-xs"
+              >
+                {'Скасувати'}
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || !name.trim() || !date || !type}
+                className="bg-[#E85D04] hover:bg-[#F4845F] text-white text-xs rounded-[7px] min-w-[90px]"
+              >
+                {isPending ? 'Збереження...' : 'Зберегти'}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
