@@ -48,3 +48,22 @@ export type MemberForSelect = {
   firstName: string
   lastName: string
 }
+
+export type PendingAssign = {
+  type: 'assign'
+  positionId: string
+  positionName: string
+  memberId: string
+  memberFirstName: string
+  memberLastName: string
+  startDate: string
+}
+
+export type PendingRemove = {
+  type: 'remove'
+  positionId: string
+  membershipId: string
+  endDate: string
+}
+
+export type PendingChange = PendingAssign | PendingRemove

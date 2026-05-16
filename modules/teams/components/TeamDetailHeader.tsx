@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import { TeamType } from '@prisma/client'
-import { updateTeam, archiveTeam, unarchiveTeam } from '../actions/updateTeam'
+import { archiveTeam, unarchiveTeam, deleteTeam } from '../actions/updateTeam'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 
 interface TeamDetailHeaderProps {
   team: {
@@ -18,7 +21,7 @@ interface TeamDetailHeaderProps {
   isEditing: boolean
   onEdit: () => void
   onCancelEdit: () => void
-  onSaved: () => void
+  onSave: (formData: FormData) => Promise<{ error?: string } | undefined>
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -39,8 +42,9 @@ export function TeamDetailHeader({
   isEditing,
   onEdit,
   onCancelEdit,
-  onSaved,
+  onSave,
 }: TeamDetailHeaderProps) {
+  const router = useRouter()
   const [name, setName] = useState(team.name)
   const [type, setType] = useState<string>(team.type)
   const [startDate, setStartDate] = useState(toDateInput(team.startDate))
@@ -48,6 +52,10 @@ export function TeamDetailHeader({
   const [notes, setNotes] = useState(team.notes ?? '')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [showDateWarning, setShowDateWarning] = useState(false)
+  const [portalMounted, setPortalMounted] = useState(false)
+  useEffect(() => { setPortalMounted(true) }, [])
 
   function handleStartEdit() {
     setName(team.name)
@@ -70,9 +78,8 @@ export function TeamDetailHeader({
     if (endDate) formData.set('endDate', endDate)
     formData.set('notes', notes)
     startTransition(async () => {
-      const result = await updateTeam(formData)
+      const result = await onSave(formData)
       if (result?.error) setError(result.error)
-      else onSaved()
     })
   }
 
@@ -83,8 +90,19 @@ export function TeamDetailHeader({
   }
 
   function handleUnarchive() {
+    if (team.endDate && new Date(team.endDate) < new Date()) {
+      setShowDateWarning(true)
+      return
+    }
     startTransition(async () => {
       await unarchiveTeam(team.id)
+    })
+  }
+
+  function handleDelete() {
+    startTransition(async () => {
+      await deleteTeam(team.id)
+      router.push('/teams')
     })
   }
 
@@ -195,6 +213,7 @@ export function TeamDetailHeader({
   }
 
   return (
+    <>
     <div className="flex items-start justify-between mb-6">
       <div>
         <div className="flex items-center gap-3 mb-2">
@@ -259,8 +278,48 @@ export function TeamDetailHeader({
               {isPending ? '...' : 'Архівувати'}
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            disabled={isPending}
+            className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 bg-white rounded-[7px] hover:bg-red-50 disabled:opacity-50 transition-colors"
+          >
+            {'Видалити'}
+          </button>
         </div>
       )}
     </div>
+
+    <ConfirmDialog
+      open={confirmDelete}
+      title="Видалити команду?"
+      description={`Команда "${team.name}" та всі пов'язані дані (позиції, призначення, історія подач) будуть видалені назавжди.`}
+      confirmLabel="Видалити"
+      onConfirm={handleDelete}
+      onCancel={() => setConfirmDelete(false)}
+      dangerous
+    />
+
+    {showDateWarning && portalMounted && createPortal(
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/30" onClick={() => setShowDateWarning(false)} />
+        <div className="relative bg-white rounded-[10px] border border-gray-100 shadow-lg p-6 w-full max-w-sm">
+          <h3 className="text-[15px] font-semibold text-gray-900 mb-2">{'Неможливо розархівувати'}</h3>
+          <p className="text-[13px] text-gray-500 mb-6">
+            {`Дата завершення команди (${new Date(team.endDate!).toLocaleDateString('uk-UA')}) вже минула. Щоб розархівувати команду, спочатку оновіть або видаліть дату завершення.`}
+          </p>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowDateWarning(false)}
+              className="px-4 py-2 text-xs font-semibold text-white bg-[#E85D04] hover:bg-[#F4845F] rounded-[7px] transition-colors"
+            >
+              {'Зрозуміло'}
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   )
 }

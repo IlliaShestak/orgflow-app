@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { TeamDetailHeader } from './TeamDetailHeader'
 import { PositionCard } from './PositionCard'
 import { AddPositionForm } from './AddPositionForm'
-import { TeamWithPositions, MemberForSelect } from '../types'
+import { TeamWithPositions, MemberForSelect, PendingChange, PendingAssign, PendingRemove } from '../types'
+import { saveTeamWithChanges } from '../actions/updateTeam'
 
 interface TeamDetailClientProps {
   team: TeamWithPositions
@@ -14,11 +15,50 @@ interface TeamDetailClientProps {
 
 export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClientProps) {
   const [isEditing, setIsEditing] = useState(false)
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([])
 
   const regularPositions = team.positions.filter((p) => !p.isHelper)
   const helperPositions = team.positions.filter((p) => p.isHelper)
 
   const positionsEditable = canEdit && isEditing && !team.isArchived
+
+  async function handleSave(formData: FormData): Promise<{ error?: string } | undefined> {
+    const assigns = (pendingChanges.filter((c) => c.type === 'assign') as PendingAssign[]).map((c) => ({
+      positionId: c.positionId,
+      positionName: c.positionName,
+      memberId: c.memberId,
+      startDate: c.startDate,
+    }))
+    const removes = (pendingChanges.filter((c) => c.type === 'remove') as PendingRemove[]).map((c) => ({
+      membershipId: c.membershipId,
+      endDate: c.endDate,
+    }))
+
+    const result = await saveTeamWithChanges(formData, assigns, removes)
+    if (result?.error) return result
+
+    setPendingChanges([])
+    setIsEditing(false)
+  }
+
+  function handleCancelEdit() {
+    setPendingChanges([])
+    setIsEditing(false)
+  }
+
+  function handlePendingAssign(change: PendingAssign) {
+    setPendingChanges((prev) => [...prev, change])
+  }
+
+  function handlePendingRemove(change: PendingRemove) {
+    setPendingChanges((prev) => [...prev, change])
+  }
+
+  function handleCancelPendingAssign(positionId: string, memberId: string) {
+    setPendingChanges((prev) =>
+      prev.filter((c) => !(c.type === 'assign' && c.positionId === positionId && c.memberId === memberId))
+    )
+  }
 
   return (
     <>
@@ -27,8 +67,8 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
         canEdit={canEdit}
         isEditing={isEditing}
         onEdit={() => setIsEditing(true)}
-        onCancelEdit={() => setIsEditing(false)}
-        onSaved={() => setIsEditing(false)}
+        onCancelEdit={handleCancelEdit}
+        onSave={handleSave}
       />
 
       {positionsEditable && (
@@ -59,6 +99,10 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
                   teamName={team.name}
                   canEdit={positionsEditable}
                   allMembers={allMembers}
+                  pendingChanges={pendingChanges}
+                  onPendingAssign={handlePendingAssign}
+                  onPendingRemove={handlePendingRemove}
+                  onCancelPendingAssign={handleCancelPendingAssign}
                 />
               ))}
             </div>
@@ -82,6 +126,10 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
                     teamName={team.name}
                     canEdit={positionsEditable}
                     allMembers={allMembers}
+                    pendingChanges={pendingChanges}
+                    onPendingAssign={handlePendingAssign}
+                    onPendingRemove={handlePendingRemove}
+                    onCancelPendingAssign={handleCancelPendingAssign}
                   />
                 ))}
               </div>

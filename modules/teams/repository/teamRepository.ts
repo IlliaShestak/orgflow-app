@@ -3,8 +3,19 @@ import { TeamType } from '@prisma/client'
 import { TeamListItem, TeamWithPositions, MemberForSelect } from '../types'
 
 export async function getTeams(): Promise<TeamListItem[]> {
+  const now = new Date()
+
+  // Auto-archive teams whose endDate has passed
+  await prisma.team.updateMany({
+    where: { isArchived: false, endDate: { lt: now } },
+    data: { isArchived: true },
+  })
+
   return prisma.team.findMany({
-    orderBy: [{ isArchived: 'asc' }, { createdAt: 'desc' }],
+    orderBy: [
+      { startDate: { sort: 'desc', nulls: 'last' } },
+      { createdAt: 'desc' },
+    ],
     select: {
       id: true,
       name: true,
@@ -63,7 +74,14 @@ export async function updateTeam(id: string, data: {
 }
 
 export async function archiveTeam(id: string) {
-  return prisma.team.update({ where: { id }, data: { isArchived: true } })
+  const team = await prisma.team.findUnique({ where: { id }, select: { endDate: true } })
+  return prisma.team.update({
+    where: { id },
+    data: {
+      isArchived: true,
+      endDate: team?.endDate ?? new Date(),
+    },
+  })
 }
 
 export async function unarchiveTeam(id: string) {
@@ -130,6 +148,18 @@ export async function removeMember(membershipId: string, endDate: Date) {
   return prisma.teamMembership.update({
     where: { id: membershipId },
     data: { endDate },
+  })
+}
+
+export async function deleteTeamWithAllData(id: string) {
+  const team = await prisma.team.findUnique({ where: { id }, select: { name: true } })
+  if (!team) return
+
+  await prisma.$transaction(async (tx) => {
+    await tx.applicationHistory.deleteMany({ where: { teamName: team.name } })
+    await tx.teamMembership.deleteMany({ where: { position: { teamId: id } } })
+    await tx.position.deleteMany({ where: { teamId: id } })
+    await tx.team.delete({ where: { id } })
   })
 }
 

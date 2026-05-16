@@ -4,7 +4,14 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { updateTeamSchema } from '../validators/teamSchema'
-import { updateTeam as updateTeamInDb, archiveTeam as archiveTeamInDb, unarchiveTeam as unarchiveTeamInDb } from '../repository/teamRepository'
+import {
+  updateTeam as updateTeamInDb,
+  archiveTeam as archiveTeamInDb,
+  unarchiveTeam as unarchiveTeamInDb,
+  assignMember as assignMemberInDb,
+  removeMember as removeMemberInDb,
+  deleteTeamWithAllData,
+} from '../repository/teamRepository'
 import { TeamType } from '@prisma/client'
 
 export async function updateTeam(formData: FormData) {
@@ -41,6 +48,77 @@ export async function updateTeam(formData: FormData) {
     return { success: true }
   } catch {
     return { error: 'Помилка при оновленні команди' }
+  }
+}
+
+export async function saveTeamWithChanges(
+  formData: FormData,
+  pendingAssigns: { positionId: string; positionName: string; memberId: string; startDate: string }[],
+  pendingRemoves: { membershipId: string; endDate: string }[]
+) {
+  const session = await auth()
+  if (!session || (session.user.role !== 'Admin' && session.user.role !== 'VP4HR')) {
+    redirect('/information-book')
+  }
+
+  const notesRaw = (formData.get('notes') as string | null) ?? ''
+  const raw = {
+    id: formData.get('id'),
+    name: formData.get('name'),
+    type: formData.get('type'),
+    startDate: formData.get('startDate') || undefined,
+    endDate: formData.get('endDate') || undefined,
+    notes: notesRaw.trim() || null,
+  }
+
+  const parsed = updateTeamSchema.safeParse(raw)
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message }
+  }
+
+  try {
+    await updateTeamInDb(parsed.data.id, {
+      name: parsed.data.name,
+      type: parsed.data.type as TeamType,
+      startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : null,
+      endDate: parsed.data.endDate ? new Date(parsed.data.endDate) : null,
+      notes: parsed.data.notes ?? null,
+    })
+
+    for (const a of pendingAssigns) {
+      await assignMemberInDb({
+        positionId: a.positionId,
+        memberId: a.memberId,
+        startDate: new Date(a.startDate),
+        teamName: parsed.data.name,
+        positionName: a.positionName,
+      })
+    }
+
+    for (const r of pendingRemoves) {
+      await removeMemberInDb(r.membershipId, new Date(r.endDate))
+    }
+
+    revalidatePath('/teams')
+    revalidatePath(`/teams/${parsed.data.id}`)
+    return { success: true }
+  } catch {
+    return { error: 'Помилка при збереженні змін команди' }
+  }
+}
+
+export async function deleteTeam(teamId: string) {
+  const session = await auth()
+  if (!session || (session.user.role !== 'Admin' && session.user.role !== 'VP4HR')) {
+    redirect('/information-book')
+  }
+
+  try {
+    await deleteTeamWithAllData(teamId)
+    revalidatePath('/teams')
+    return { success: true }
+  } catch {
+    return { error: 'Помилка при видаленні команди' }
   }
 }
 
