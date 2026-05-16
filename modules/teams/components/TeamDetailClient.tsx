@@ -13,9 +13,16 @@ interface TeamDetailClientProps {
   canEdit: boolean
 }
 
+function toDateString(date: Date | string | null): string {
+  if (!date) return ''
+  const d = new Date(date)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClientProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([])
+  const [liveStartDate, setLiveStartDate] = useState(() => toDateString(team.startDate))
 
   const regularPositions = team.positions.filter((p) => !p.isHelper)
   const helperPositions = team.positions.filter((p) => p.isHelper)
@@ -44,6 +51,7 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
 
   function handleCancelEdit() {
     setPendingChanges([])
+    setLiveStartDate(toDateString(team.startDate))
     setIsEditing(false)
   }
 
@@ -70,6 +78,7 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
         onEdit={() => setIsEditing(true)}
         onCancelEdit={handleCancelEdit}
         onSave={handleSave}
+        onStartDateChange={setLiveStartDate}
       />
 
       {canManagePositions && (
@@ -99,7 +108,7 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
                   teamId={team.id}
                   teamName={team.name}
                   canEdit={canEditMembers}
-                  teamStartDate={team.startDate}
+                  teamStartDate={liveStartDate || null}
                   allMembers={allMembers}
                   pendingChanges={pendingChanges}
                   onPendingAssign={handlePendingAssign}
@@ -127,7 +136,7 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
                     teamId={team.id}
                     teamName={team.name}
                     canEdit={canEditMembers}
-                    teamStartDate={team.startDate}
+                    teamStartDate={liveStartDate || null}
                     allMembers={allMembers}
                     pendingChanges={pendingChanges}
                     onPendingAssign={handlePendingAssign}

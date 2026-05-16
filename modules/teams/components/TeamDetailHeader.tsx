@@ -22,6 +22,7 @@ interface TeamDetailHeaderProps {
   onEdit: () => void
   onCancelEdit: () => void
   onSave: (formData: FormData) => Promise<{ error?: string } | undefined>
+  onStartDateChange?: (date: string) => void
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -43,6 +44,7 @@ export function TeamDetailHeader({
   onEdit,
   onCancelEdit,
   onSave,
+  onStartDateChange,
 }: TeamDetailHeaderProps) {
   const router = useRouter()
   const [name, setName] = useState(team.name)
@@ -60,7 +62,9 @@ export function TeamDetailHeader({
   function handleStartEdit() {
     setName(team.name)
     setType(team.type)
-    setStartDate(toDateInput(team.startDate))
+    const sd = toDateInput(team.startDate)
+    setStartDate(sd)
+    onStartDateChange?.(sd)
     setEndDate(toDateInput(team.endDate))
     setNotes(team.notes ?? '')
     setError(null)
@@ -173,7 +177,7 @@ export function TeamDetailHeader({
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => { setStartDate(e.target.value); onStartDateChange?.(e.target.value) }}
                 className="w-full border border-gray-200 rounded-[7px] px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:border-[#E85D04] transition-colors"
               />
             </div>
