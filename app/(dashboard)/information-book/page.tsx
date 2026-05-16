@@ -26,7 +26,8 @@ export default async function InformationBookPage({ searchParams }: PageProps) {
   const filters = {
     search: params.search,
     status: params.status as MemberStatus | undefined,
-    state: params.state as MemberState | undefined,
+    // undefined → default Active; 'all' → user explicitly cleared the filter
+    state: params.state === 'all' ? undefined : ((params.state as MemberState | undefined) ?? 'Active'),
   }
 
   const [members, mentors] = await Promise.all([

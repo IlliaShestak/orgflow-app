@@ -5,7 +5,7 @@ import { MemberStatus, MemberState } from '@prisma/client'
 export async function getMembers(filters: MemberFilters = {}) {
   const { search, status, state, mentorId } = filters
 
-  return prisma.member.findMany({
+  const members = await prisma.member.findMany({
     where: {
       ...(search && {
         OR: [
@@ -31,7 +31,13 @@ export async function getMembers(filters: MemberFilters = {}) {
         select: { id: true, firstName: true, lastName: true },
       },
     },
-    orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+  })
+
+  const STATUS_ORDER: Record<string, number> = { Full: 1, Baby: 2, Observer: 3, Alumni: 4 }
+  return members.sort((a, b) => {
+    const sd = (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5)
+    if (sd !== 0) return sd
+    return b.joinedAt.getTime() - a.joinedAt.getTime()
   })
 }
 

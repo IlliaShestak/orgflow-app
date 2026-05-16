@@ -48,11 +48,11 @@ export function MemberFilters() {
         <option value="Alumni">Alumni</option>
       </select>
       <select
-        defaultValue={searchParams.get('state') ?? ''}
+        defaultValue={searchParams.get('state') ?? 'Active'}
         onChange={e => handleChange('state', e.target.value)}
         className={selectClass}
       >
-        <option value="">Всі стани</option>
+        <option value="all">Всі стани</option>
         <option value="Active">Активні</option>
         <option value="Inactive">Неактивні</option>
       </select>
