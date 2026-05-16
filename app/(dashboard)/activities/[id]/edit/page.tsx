@@ -29,7 +29,6 @@ export default async function EditActivityPage({ params }: { params: Promise<{ i
   ])
 
   const initialAttendeeIds = activity.attendance.map((a) => a.memberId)
-  const hasKnowledgeTopics = activity.agendaItems.some((item) => item.knowledgeTopicId !== null)
 
   return (
     <div className="p-8">
@@ -48,7 +47,6 @@ export default async function EditActivityPage({ params }: { params: Promise<{ i
           availableTopics={allTopics}
           members={allMembers}
           initialAttendeeIds={initialAttendeeIds}
-          hasKnowledgeTopics={hasKnowledgeTopics}
         />
       </div>
     </div>

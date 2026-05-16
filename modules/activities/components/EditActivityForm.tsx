@@ -48,7 +48,6 @@ interface EditActivityFormProps {
   availableTopics: KnowledgeTopic[]
   members: MemberOption[]
   initialAttendeeIds: string[]
-  hasKnowledgeTopics: boolean
 }
 
 const typeLabels: Record<ActivityType, string> = {
@@ -71,7 +70,6 @@ export function EditActivityForm({
   availableTopics,
   members,
   initialAttendeeIds,
-  hasKnowledgeTopics,
 }: EditActivityFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -132,9 +130,8 @@ export function EditActivityForm({
         setError(attendanceResult.error ?? 'Помилка збереження відвідуваності')
         return
       }
-      if (hasKnowledgeTopics) {
-        await syncCoverageForActivity(activity.id)
-      }
+      // Always run — the action short-circuits when there are no topics or no attendees
+      await syncCoverageForActivity(activity.id)
 
       router.push(`/activities/${activity.id}`)
     })
