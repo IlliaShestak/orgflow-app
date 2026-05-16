@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { updateTeamSchema } from '../validators/teamSchema'
-import { updateTeam as updateTeamInDb, archiveTeam as archiveTeamInDb } from '../repository/teamRepository'
+import { updateTeam as updateTeamInDb, archiveTeam as archiveTeamInDb, unarchiveTeam as unarchiveTeamInDb } from '../repository/teamRepository'
 import { TeamType } from '@prisma/client'
 
 export async function updateTeam(formData: FormData) {
@@ -50,8 +50,25 @@ export async function archiveTeam(teamId: string) {
   try {
     await archiveTeamInDb(teamId)
     revalidatePath('/teams')
+    revalidatePath(`/teams/${teamId}`)
     return { success: true }
   } catch {
     return { error: 'Помилка при архівуванні команди' }
+  }
+}
+
+export async function unarchiveTeam(teamId: string) {
+  const session = await auth()
+  if (!session || (session.user.role !== 'Admin' && session.user.role !== 'VP4HR')) {
+    redirect('/information-book')
+  }
+
+  try {
+    await unarchiveTeamInDb(teamId)
+    revalidatePath('/teams')
+    revalidatePath(`/teams/${teamId}`)
+    return { success: true }
+  } catch {
+    return { error: 'Помилка при розархівуванні команди' }
   }
 }

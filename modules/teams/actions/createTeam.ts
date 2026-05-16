@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createTeamSchema } from '../validators/teamSchema'
-import { createTeam as createTeamInDb } from '../repository/teamRepository'
+import { createTeam as createTeamInDb, createCoreteamPositions } from '../repository/teamRepository'
 import { TeamType } from '@prisma/client'
 
 export async function createTeam(formData: FormData) {
@@ -32,6 +32,9 @@ export async function createTeam(formData: FormData) {
       startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : undefined,
       endDate: parsed.data.endDate ? new Date(parsed.data.endDate) : undefined,
     })
+    if (parsed.data.type === 'Coreteam') {
+      await createCoreteamPositions(team.id)
+    }
     revalidatePath('/teams')
     return { success: true, id: team.id }
   } catch {

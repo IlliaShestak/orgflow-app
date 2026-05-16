@@ -65,6 +65,18 @@ export async function archiveTeam(id: string) {
   return prisma.team.update({ where: { id }, data: { isArchived: true } })
 }
 
+export async function unarchiveTeam(id: string) {
+  return prisma.team.update({ where: { id }, data: { isArchived: false } })
+}
+
+const CORETEAM_PRESET_POSITIONS = ['MO', 'HR', 'PR', 'CT', 'LG', 'DS', 'IT', 'Mentor', 'CR', 'CR']
+
+export async function createCoreteamPositions(teamId: string) {
+  await prisma.position.createMany({
+    data: CORETEAM_PRESET_POSITIONS.map((name) => ({ teamId, name, isHelper: false })),
+  })
+}
+
 export async function createPosition(data: {
   teamId: string
   name: string
