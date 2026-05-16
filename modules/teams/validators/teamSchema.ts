@@ -13,6 +13,7 @@ export const updateTeamSchema = z.object({
   type: z.enum(['Coreteam', 'Project', 'Team']),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  notes: z.string().nullable().optional(),
 })
 
 export const createPositionSchema = z.object({

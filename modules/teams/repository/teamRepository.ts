@@ -57,6 +57,7 @@ export async function updateTeam(id: string, data: {
   type: TeamType
   startDate?: Date | null
   endDate?: Date | null
+  notes?: string | null
 }) {
   return prisma.team.update({ where: { id }, data })
 }
@@ -69,7 +70,7 @@ export async function unarchiveTeam(id: string) {
   return prisma.team.update({ where: { id }, data: { isArchived: false } })
 }
 
-const CORETEAM_PRESET_POSITIONS = ['MO', 'HR', 'PR', 'CT', 'LG', 'DS', 'IT', 'Mentor', 'CR', 'CR']
+const CORETEAM_PRESET_POSITIONS = ['MO', 'HR', 'PR', 'CT', 'LG', 'DS', 'IT', 'Mentor', 'CR']
 
 export async function createCoreteamPositions(teamId: string) {
   await prisma.position.createMany({

@@ -13,12 +13,14 @@ export async function updateTeam(formData: FormData) {
     redirect('/information-book')
   }
 
+  const notesRaw = (formData.get('notes') as string | null) ?? ''
   const raw = {
     id: formData.get('id'),
     name: formData.get('name'),
     type: formData.get('type'),
     startDate: formData.get('startDate') || undefined,
     endDate: formData.get('endDate') || undefined,
+    notes: notesRaw.trim() || null,
   }
 
   const parsed = updateTeamSchema.safeParse(raw)
@@ -32,6 +34,7 @@ export async function updateTeam(formData: FormData) {
       type: parsed.data.type as TeamType,
       startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : null,
       endDate: parsed.data.endDate ? new Date(parsed.data.endDate) : null,
+      notes: parsed.data.notes ?? null,
     })
     revalidatePath('/teams')
     revalidatePath(`/teams/${parsed.data.id}`)

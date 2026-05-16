@@ -7,6 +7,7 @@ export type TeamWithPositions = {
   startDate: Date | null
   endDate: Date | null
   isArchived: boolean
+  notes: string | null
   createdAt: Date
   positions: PositionWithMemberships[]
 }

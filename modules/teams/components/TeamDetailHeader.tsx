@@ -12,8 +12,13 @@ interface TeamDetailHeaderProps {
     startDate: Date | null
     endDate: Date | null
     isArchived: boolean
+    notes: string | null
   }
   canEdit: boolean
+  isEditing: boolean
+  onEdit: () => void
+  onCancelEdit: () => void
+  onSaved: () => void
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -28,12 +33,19 @@ function toDateInput(date: Date | null): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
-  const [isEditing, setIsEditing] = useState(false)
+export function TeamDetailHeader({
+  team,
+  canEdit,
+  isEditing,
+  onEdit,
+  onCancelEdit,
+  onSaved,
+}: TeamDetailHeaderProps) {
   const [name, setName] = useState(team.name)
   const [type, setType] = useState<string>(team.type)
   const [startDate, setStartDate] = useState(toDateInput(team.startDate))
   const [endDate, setEndDate] = useState(toDateInput(team.endDate))
+  const [notes, setNotes] = useState(team.notes ?? '')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -42,8 +54,9 @@ export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
     setType(team.type)
     setStartDate(toDateInput(team.startDate))
     setEndDate(toDateInput(team.endDate))
+    setNotes(team.notes ?? '')
     setError(null)
-    setIsEditing(true)
+    onEdit()
   }
 
   function handleSave() {
@@ -55,10 +68,11 @@ export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
     formData.set('type', type)
     if (startDate) formData.set('startDate', startDate)
     if (endDate) formData.set('endDate', endDate)
+    formData.set('notes', notes)
     startTransition(async () => {
       const result = await updateTeam(formData)
       if (result?.error) setError(result.error)
-      else setIsEditing(false)
+      else onSaved()
     })
   }
 
@@ -91,7 +105,7 @@ export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
+              onClick={onCancelEdit}
               className="px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-[7px] hover:bg-gray-50 transition-colors"
             >
               {'Скасувати'}
@@ -157,6 +171,22 @@ export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
               />
             </div>
           </div>
+
+          <div className="space-y-1">
+            <label className="block text-[10px] font-medium text-gray-500 uppercase tracking-[0.5px]">
+              {'Додаткова інформація'}
+              <span className="text-gray-400 font-normal normal-case tracking-normal ml-1">
+                {'(необовʼязково)'}
+              </span>
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Будь-яка додаткова інформація про команду..."
+              rows={3}
+              className="w-full border border-gray-200 rounded-[7px] px-3 py-2 text-[13px] text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#E85D04] transition-colors resize-none"
+            />
+          </div>
         </div>
 
         {error && <p className="text-xs text-red-500 mt-3">{error}</p>}
@@ -180,7 +210,7 @@ export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
         </div>
 
         {(formattedStart || formattedEnd) && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
             {formattedStart && (
               <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#0A3D91] bg-[#E8EDF8] px-3 py-1 rounded-[6px]">
                 <span className="text-[10px] font-normal text-[#4472CA]">{'від'}</span>
@@ -194,6 +224,10 @@ export function TeamDetailHeader({ team, canEdit }: TeamDetailHeaderProps) {
               </span>
             )}
           </div>
+        )}
+
+        {team.notes && (
+          <p className="text-[13px] text-gray-600 max-w-xl whitespace-pre-wrap">{team.notes}</p>
         )}
       </div>
 
