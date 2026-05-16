@@ -37,7 +37,7 @@ export async function getMembers(filters: MemberFilters = {}) {
   return members.sort((a, b) => {
     const sd = (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5)
     if (sd !== 0) return sd
-    return b.joinedAt.getTime() - a.joinedAt.getTime()
+    return a.joinedAt.getTime() - b.joinedAt.getTime()
   })
 }
 
