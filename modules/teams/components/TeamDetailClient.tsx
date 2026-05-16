@@ -20,7 +20,8 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
   const regularPositions = team.positions.filter((p) => !p.isHelper)
   const helperPositions = team.positions.filter((p) => p.isHelper)
 
-  const positionsEditable = canEdit && isEditing && !team.isArchived
+  const canManagePositions = canEdit && isEditing && !team.isArchived
+  const canEditMembers = canEdit && isEditing
 
   async function handleSave(formData: FormData): Promise<{ error?: string } | undefined> {
     const assigns = (pendingChanges.filter((c) => c.type === 'assign') as PendingAssign[]).map((c) => ({
@@ -71,7 +72,7 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
         onSave={handleSave}
       />
 
-      {positionsEditable && (
+      {canManagePositions && (
         <div className="bg-white border border-gray-100 rounded-[10px] p-4 mb-6">
           <h2 className="text-[13px] font-semibold text-gray-800 mb-3">{'Додати позицію'}</h2>
           <AddPositionForm teamId={team.id} isCoreteam={team.type === 'Coreteam'} />
@@ -97,7 +98,8 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
                   position={position}
                   teamId={team.id}
                   teamName={team.name}
-                  canEdit={positionsEditable}
+                  canEdit={canEditMembers}
+                  teamStartDate={team.startDate}
                   allMembers={allMembers}
                   pendingChanges={pendingChanges}
                   onPendingAssign={handlePendingAssign}
@@ -124,7 +126,8 @@ export function TeamDetailClient({ team, allMembers, canEdit }: TeamDetailClient
                     position={position}
                     teamId={team.id}
                     teamName={team.name}
-                    canEdit={positionsEditable}
+                    canEdit={canEditMembers}
+                    teamStartDate={team.startDate}
                     allMembers={allMembers}
                     pendingChanges={pendingChanges}
                     onPendingAssign={handlePendingAssign}

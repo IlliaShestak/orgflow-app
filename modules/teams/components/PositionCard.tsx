@@ -12,6 +12,7 @@ interface PositionCardProps {
   teamId: string
   teamName: string
   canEdit: boolean
+  teamStartDate?: Date | string | null
   allMembers: MemberForSelect[]
   pendingChanges: PendingChange[]
   onPendingAssign: (change: PendingAssign) => void
@@ -24,12 +25,17 @@ export function PositionCard({
   teamId,
   teamName,
   canEdit,
+  teamStartDate,
   allMembers,
   pendingChanges,
   onPendingAssign,
   onPendingRemove,
   onCancelPendingAssign,
 }: PositionCardProps) {
+  const defaultStartDate = teamStartDate
+    ? new Date(teamStartDate).toISOString().split('T')[0]
+    : new Date().toISOString().split('T')[0]
+  const usingTodayFallback = !teamStartDate
   const [showAssign, setShowAssign] = useState(false)
   const [confirmDeletePos, setConfirmDeletePos] = useState(false)
   const [removingId, setRemovingId] = useState<string | null>(null)
@@ -237,9 +243,14 @@ export function PositionCard({
                   name="startDate"
                   type="date"
                   required
-                  defaultValue={new Date().toISOString().split('T')[0]}
+                  defaultValue={defaultStartDate}
                   className="border border-gray-200 rounded-[7px] px-2 py-1.5 text-[12px] text-gray-800 focus:outline-none focus:border-[#E85D04]"
                 />
+                {usingTodayFallback && (
+                  <p className="text-[10px] text-yellow-500 mt-1">
+                    {'Дата початку команди не вказана — встановлено сьогодні'}
+                  </p>
+                )}
               </div>
               <button
                 type="submit"
