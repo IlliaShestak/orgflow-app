@@ -2,7 +2,6 @@ import { getActivities } from '@/modules/activities/repository/activityRepositor
 import { ActivityTypeBadge } from '@/modules/activities/components/ActivityTypeBadge'
 import { AddActivityDialog } from '@/modules/activities/components/AddActivityDialog'
 import { getSession } from '@/shared/lib/auth'
-import { prisma } from '@/shared/lib/prisma'
 import Link from 'next/link'
 import { Role, ActivityType } from '@prisma/client'
 
@@ -19,26 +18,11 @@ export default async function ActivitiesPage({
   const typeFilter = type as ActivityType | undefined
   const activities = await getActivities({ type: typeFilter, search })
 
-  let dialogTopics: { id: string; name: string; knowledgeTable: { name: string } }[] = []
-  let dialogMembers: { id: string; firstName: string; lastName: string }[] = []
-
-  if (canCreate) {
-    ;[dialogTopics, dialogMembers] = await Promise.all([
-      prisma.knowledgeTopic.findMany({
-        select: { id: true, name: true, knowledgeTable: { select: { name: true } } },
-        orderBy: [{ knowledgeTable: { name: 'asc' } }, { order: 'asc' }],
-      }),
-      prisma.member.findMany({
-        select: { id: true, firstName: true, lastName: true },
-        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
-      }),
-    ])
-  }
-
   const typeLabels: Record<string, string> = {
     Gathering: 'Gathering',
     SIT: 'SIT',
     LeisureEvent: 'Leisure Event',
+    ThursdayMeeting: 'Четвергові збори',
   }
 
   const now = new Date()
@@ -52,7 +36,7 @@ export default async function ActivitiesPage({
           <p className="text-xs text-gray-400 mt-0.5">{activities.length} заходів</p>
         </div>
         {canCreate && (
-          <AddActivityDialog availableTopics={dialogTopics} availableMembers={dialogMembers} />
+          <AddActivityDialog />
         )}
       </div>
 

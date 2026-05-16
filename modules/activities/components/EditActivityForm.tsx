@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ActivityType } from '@prisma/client'
 import { AgendaEditor, type DraftItem } from './AgendaEditor'
 import { AttendanceTable } from './AttendanceTable'
-import { updateActivity, saveAgenda } from '../actions/activityActions'
+import { updateActivity, saveAgenda, setAttendance, syncCoverageForActivity } from '../actions/activityActions'
 
 interface KnowledgeTopic {
   id: string
@@ -91,6 +91,7 @@ export function EditActivityForm({
       tableName: item.knowledgeTopic?.knowledgeTable.name,
     }))
   )
+  const [attendeeIds, setAttendeeIds] = useState<Set<string>>(() => new Set(initialAttendeeIds))
 
   function handleCancel() {
     router.push(`/activities/${activity.id}`)
@@ -124,6 +125,15 @@ export function EditActivityForm({
       if (!agendaResult.success) {
         setError(agendaResult.error ?? 'Помилка збереження агенди')
         return
+      }
+
+      const attendanceResult = await setAttendance(activity.id, [...attendeeIds])
+      if (!attendanceResult.success) {
+        setError(attendanceResult.error ?? 'Помилка збереження відвідуваності')
+        return
+      }
+      if (hasKnowledgeTopics) {
+        await syncCoverageForActivity(activity.id)
       }
 
       router.push(`/activities/${activity.id}`)
@@ -176,7 +186,9 @@ export function EditActivityForm({
               <Label className="text-xs text-gray-600">{'Тип'}</Label>
               <Select value={type} onValueChange={(v) => setType(v as ActivityType)}>
                 <SelectTrigger className="h-9">
-                  <SelectValue />
+                  <SelectValue>
+                    {typeLabels[type]}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(typeLabels).map(([val, label]) => (
@@ -243,8 +255,8 @@ export function EditActivityForm({
           <AttendanceTable
             activityId={activity.id}
             members={members}
-            initialAttendeeIds={initialAttendeeIds}
-            hasKnowledgeTopics={hasKnowledgeTopics}
+            attendeeIds={attendeeIds}
+            onAttendeeIdsChange={setAttendeeIds}
           />
         </div>
       </div>

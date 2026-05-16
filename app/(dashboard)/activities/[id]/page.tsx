@@ -70,40 +70,32 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div className="bg-white border border-gray-100 rounded-[10px] p-4">
             <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Всього'}</p>
             <p className="text-[28px] font-bold text-[#E85D04]">{statusCounts.total}</p>
             <p className="text-[12px] text-gray-500 mt-0.5">{'присутніх'}</p>
           </div>
-          {statusCounts.Observer > 0 && (
-            <div className="bg-white border border-gray-100 rounded-[10px] p-4">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Observer'}</p>
-              <p className="text-[28px] font-bold text-[#0A3D91]">{statusCounts.Observer}</p>
-              <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
-            </div>
-          )}
-          {statusCounts.Baby > 0 && (
-            <div className="bg-white border border-gray-100 rounded-[10px] p-4">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Baby'}</p>
-              <p className="text-[28px] font-bold text-[#E85D04]">{statusCounts.Baby}</p>
-              <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
-            </div>
-          )}
-          {statusCounts.Full > 0 && (
-            <div className="bg-white border border-gray-100 rounded-[10px] p-4">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Full'}</p>
-              <p className="text-[28px] font-bold text-[#0B7B45]">{statusCounts.Full}</p>
-              <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
-            </div>
-          )}
-          {statusCounts.Alumni > 0 && (
-            <div className="bg-white border border-gray-100 rounded-[10px] p-4">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Alumni'}</p>
-              <p className="text-[28px] font-bold text-gray-500">{statusCounts.Alumni}</p>
-              <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
-            </div>
-          )}
+          <div className="bg-white border border-gray-100 rounded-[10px] p-4">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Observer'}</p>
+            <p className="text-[28px] font-bold text-[#0A3D91]">{statusCounts.Observer}</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-[10px] p-4">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Baby'}</p>
+            <p className="text-[28px] font-bold text-[#E85D04]">{statusCounts.Baby}</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-[10px] p-4">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Full'}</p>
+            <p className="text-[28px] font-bold text-[#0B7B45]">{statusCounts.Full}</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-[10px] p-4">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">{'Alumni'}</p>
+            <p className="text-[28px] font-bold text-gray-500">{statusCounts.Alumni}</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">{'учасників'}</p>
+          </div>
         </div>
 
         {/* Agenda card */}

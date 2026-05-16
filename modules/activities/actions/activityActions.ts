@@ -161,6 +161,24 @@ export async function removeAttendance(input: { activityId: string; memberId: st
   }
 }
 
+export async function setAttendance(activityId: string, memberIds: string[]) {
+  try {
+    await requireRole(Role.Admin, Role.VP4HR)
+    await prisma.$transaction(async (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => {
+      await tx.activityAttendance.deleteMany({ where: { activityId } })
+      if (memberIds.length > 0) {
+        await tx.activityAttendance.createMany({
+          data: memberIds.map((memberId) => ({ activityId, memberId })),
+        })
+      }
+    })
+    revalidatePath(`/activities/${activityId}`)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка збереження відвідуваності' }
+  }
+}
+
 export async function syncCoverageForActivity(activityId: string) {
   try {
     const session = await getSession()

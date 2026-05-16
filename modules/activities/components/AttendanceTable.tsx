@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { StatusBadge } from '@/shared/components/StatusBadge'
 import { StateBadge } from '@/shared/components/StateBadge'
 import { MemberAvatar } from '@/shared/components/MemberAvatar'
-import { markAttendance, removeAttendance, syncCoverageForActivity } from '../actions/activityActions'
 
 interface AttendanceMember {
   id: string
@@ -19,8 +18,8 @@ interface AttendanceMember {
 interface AttendanceTableProps {
   activityId: string
   members: AttendanceMember[]
-  initialAttendeeIds: string[]
-  hasKnowledgeTopics: boolean
+  attendeeIds: Set<string>
+  onAttendeeIdsChange: (ids: Set<string>) => void
 }
 
 type StateFilter = 'Active' | 'Inactive' | 'All'
@@ -34,28 +33,40 @@ const stateTabLabels: Record<StateFilter, string> = {
   All: 'Всі',
 }
 
+const STATUS_ROW_COLORS: Record<StatusFilter, { unchecked: string; checked: string }> = {
+  Observer: {
+    unchecked: 'bg-[#F0F4FB] hover:bg-[#E8EDF8]',
+    checked: 'bg-[#E8EDF8]',
+  },
+  Baby: {
+    unchecked: 'bg-[#FEF6F0] hover:bg-[#FDF0E8]',
+    checked: 'bg-[#FDF0E8]',
+  },
+  Full: {
+    unchecked: 'bg-[#EFF9F4] hover:bg-[#E6F5EE]',
+    checked: 'bg-[#E6F5EE]',
+  },
+  Alumni: {
+    unchecked: 'bg-gray-50 hover:bg-gray-100',
+    checked: 'bg-gray-100',
+  },
+}
+
 function formatDate(d: Date | string): string {
   const date = typeof d === 'string' ? new Date(d) : d
   return date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export function AttendanceTable({
-  activityId,
   members,
-  initialAttendeeIds,
-  hasKnowledgeTopics,
+  attendeeIds,
+  onAttendeeIdsChange,
 }: AttendanceTableProps) {
-  const [attendeeIds, setAttendeeIds] = useState<Set<string>>(() => new Set(initialAttendeeIds))
   const [search, setSearch] = useState('')
   const [stateFilter, setStateFilter] = useState<StateFilter>('Active')
   const [activeStatuses, setActiveStatuses] = useState<Set<StatusFilter>>(
     () => new Set(STATUS_FILTERS)
   )
-  const [error, setError] = useState<string | null>(null)
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'done'>('idle')
-
-  const [, startActionTransition] = useTransition()
-  const [, startSyncTransition] = useTransition()
 
   const filteredMembers = members.filter((m) => {
     if (stateFilter !== 'All' && m.state !== stateFilter) return false
@@ -65,7 +76,6 @@ export function AttendanceTable({
     return true
   })
 
-  const visibleIds = new Set(filteredMembers.map((m) => m.id))
   const checkedVisible = filteredMembers.filter((m) => attendeeIds.has(m.id))
   const allVisibleChecked = filteredMembers.length > 0 && checkedVisible.length === filteredMembers.length
   const someVisibleChecked = checkedVisible.length > 0 && !allVisibleChecked
@@ -82,77 +92,22 @@ export function AttendanceTable({
     })
   }
 
-  function triggerSync() {
-    if (!hasKnowledgeTopics) return
-    setSyncStatus('syncing')
-    startSyncTransition(async () => {
-      await syncCoverageForActivity(activityId)
-      setSyncStatus('done')
-      setTimeout(() => setSyncStatus('idle'), 2000)
-    })
-  }
-
   function handleToggle(memberId: string) {
-    const isChecked = attendeeIds.has(memberId)
-    setError(null)
-
-    // Optimistic update
-    setAttendeeIds((prev) => {
-      const next = new Set(prev)
-      if (isChecked) next.delete(memberId)
-      else next.add(memberId)
-      return next
-    })
-
-    startActionTransition(async () => {
-      const result = isChecked
-        ? await removeAttendance({ activityId, memberId })
-        : await markAttendance({ activityId, memberId })
-
-      if (!result.success) {
-        // Revert optimistic update
-        setAttendeeIds((prev) => {
-          const next = new Set(prev)
-          if (isChecked) next.add(memberId)
-          else next.delete(memberId)
-          return next
-        })
-        setError(result.error ?? 'Помилка')
-      } else {
-        triggerSync()
-      }
-    })
+    const next = new Set(attendeeIds)
+    if (next.has(memberId)) next.delete(memberId)
+    else next.add(memberId)
+    onAttendeeIdsChange(next)
   }
 
   function handleSelectAll() {
-    setError(null)
     if (allVisibleChecked) {
-      // Uncheck all visible
-      const toRemove = filteredMembers.filter((m) => attendeeIds.has(m.id))
-      toRemove.forEach((m) => {
-        setAttendeeIds((prev) => { const next = new Set(prev); next.delete(m.id); return next })
-        startActionTransition(async () => {
-          const result = await removeAttendance({ activityId, memberId: m.id })
-          if (!result.success) {
-            setAttendeeIds((prev) => { const next = new Set(prev); next.add(m.id); return next })
-            setError(result.error ?? 'Помилка')
-          }
-        })
-      })
+      const next = new Set(attendeeIds)
+      filteredMembers.forEach((m) => next.delete(m.id))
+      onAttendeeIdsChange(next)
     } else {
-      // Check all visible unchecked
-      const toAdd = filteredMembers.filter((m) => !attendeeIds.has(m.id))
-      toAdd.forEach((m) => {
-        setAttendeeIds((prev) => { const next = new Set(prev); next.add(m.id); return next })
-        startActionTransition(async () => {
-          const result = await markAttendance({ activityId, memberId: m.id })
-          if (!result.success) {
-            setAttendeeIds((prev) => { const next = new Set(prev); next.delete(m.id); return next })
-            setError(result.error ?? 'Помилка')
-          }
-        })
-      })
-      if (toAdd.length > 0) triggerSync()
+      const next = new Set(attendeeIds)
+      filteredMembers.forEach((m) => next.add(m.id))
+      onAttendeeIdsChange(next)
     }
   }
 
@@ -203,19 +158,21 @@ export function AttendanceTable({
       {/* Table */}
       <div className="border border-gray-100 rounded-[8px] overflow-hidden">
         {/* Header */}
-        <div className="bg-gray-50 grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 items-center px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-[0.6px]">
-          <input
-            type="checkbox"
-            checked={allVisibleChecked}
-            ref={(el) => { if (el) el.indeterminate = someVisibleChecked }}
-            onChange={handleSelectAll}
-            className="w-3.5 h-3.5 accent-[#E85D04]"
-            disabled={filteredMembers.length === 0}
-          />
+        <div className="bg-gray-50 grid grid-cols-[1fr_100px_90px_110px_40px] items-center px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-[0.6px]">
           <span>{'Учасник'}</span>
           <span>{'Статус'}</span>
           <span>{'Стан'}</span>
           <span>{'Дата вступу'}</span>
+          <div className="flex justify-center">
+            <input
+              type="checkbox"
+              checked={allVisibleChecked}
+              ref={(el) => { if (el) el.indeterminate = someVisibleChecked }}
+              onChange={handleSelectAll}
+              className="w-3.5 h-3.5 accent-[#E85D04]"
+              disabled={filteredMembers.length === 0}
+            />
+          </div>
         </div>
 
         {/* Body */}
@@ -227,19 +184,14 @@ export function AttendanceTable({
           ) : (
             filteredMembers.map((m, idx) => {
               const checked = attendeeIds.has(m.id)
+              const colors = STATUS_ROW_COLORS[m.status]
               return (
                 <div
                   key={m.id}
-                  className={`grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 items-center px-3 py-2.5 border-t border-gray-50 transition-colors ${
-                    checked ? 'bg-[#FDF8F4]' : 'bg-white hover:bg-gray-50'
+                  className={`grid grid-cols-[1fr_100px_90px_110px_40px] items-center px-3 py-2.5 border-t border-gray-50 transition-colors ${
+                    checked ? colors.checked : colors.unchecked
                   }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => handleToggle(m.id)}
-                    className="w-3.5 h-3.5 accent-[#E85D04]"
-                  />
                   <div className="flex items-center gap-2 min-w-0">
                     <MemberAvatar
                       firstName={m.firstName}
@@ -256,6 +208,14 @@ export function AttendanceTable({
                   <span className="text-xs text-gray-400 whitespace-nowrap">
                     {formatDate(m.joinedAt)}
                   </span>
+                  <div className="flex justify-center">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => handleToggle(m.id)}
+                      className="w-3.5 h-3.5 accent-[#E85D04]"
+                    />
+                  </div>
                 </div>
               )
             })
@@ -263,26 +223,10 @@ export function AttendanceTable({
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
-
-      {/* Summary + sync status */}
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] text-gray-400">
-          {'Відмічено:'} {attendeeIds.size} {'з'} {members.length}
-        </p>
-        {syncStatus === 'syncing' && (
-          <span className="text-[11px] text-[#E85D04] flex items-center gap-1.5">
-            <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-            </svg>
-            {'Оновлення покриття знань...'}
-          </span>
-        )}
-        {syncStatus === 'done' && (
-          <span className="text-[11px] text-[#0B7B45]">{'✓ Покриття оновлено'}</span>
-        )}
-      </div>
+      {/* Summary */}
+      <p className="text-[11px] text-gray-400">
+        {'Відмічено:'} {attendeeIds.size} {'з'} {members.length}
+      </p>
     </div>
   )
 }
