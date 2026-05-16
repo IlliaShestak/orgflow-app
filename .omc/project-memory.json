@@ -220,8 +220,8 @@
   "hotPaths": [
     {
       "path": "",
-      "accessCount": 46,
-      "lastAccessed": 1778947143770,
+      "accessCount": 50,
+      "lastAccessed": 1778949008339,
       "type": "directory"
     },
     {
@@ -238,14 +238,14 @@
     },
     {
       "path": "app\\(dashboard)\\information-book\\[id]\\page.tsx",
-      "accessCount": 17,
-      "lastAccessed": 1778944420073,
+      "accessCount": 19,
+      "lastAccessed": 1778948154363,
       "type": "file"
     },
     {
       "path": "shared\\lib\\prisma.ts",
-      "accessCount": 12,
-      "lastAccessed": 1778872356852,
+      "accessCount": 13,
+      "lastAccessed": 1778948394935,
       "type": "file"
     },
     {
@@ -255,15 +255,15 @@
       "type": "file"
     },
     {
-      "path": "auth.ts",
-      "accessCount": 10,
-      "lastAccessed": 1778870502843,
+      "path": "app\\(dashboard)\\information-book\\page.tsx",
+      "accessCount": 11,
+      "lastAccessed": 1778949095005,
       "type": "file"
     },
     {
-      "path": "app\\(dashboard)\\information-book\\page.tsx",
-      "accessCount": 9,
-      "lastAccessed": 1778777839249,
+      "path": "auth.ts",
+      "accessCount": 10,
+      "lastAccessed": 1778870502843,
       "type": "file"
     },
     {
@@ -297,6 +297,12 @@
       "type": "file"
     },
     {
+      "path": "modules\\hr\\repository\\memberRepository.ts",
+      "accessCount": 8,
+      "lastAccessed": 1778949178097,
+      "type": "file"
+    },
+    {
       "path": "shared\\lib\\auth.ts",
       "accessCount": 7,
       "lastAccessed": 1778857137382,
@@ -312,6 +318,12 @@
       "path": "tsconfig.json",
       "accessCount": 6,
       "lastAccessed": 1778947199167,
+      "type": "file"
+    },
+    {
+      "path": "shared\\components\\ConfirmDialog.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1778948109957,
       "type": "file"
     },
     {
@@ -351,21 +363,9 @@
       "type": "file"
     },
     {
-      "path": "shared\\components\\ConfirmDialog.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1778943728872,
-      "type": "file"
-    },
-    {
       "path": "modules\\hr\\types\\index.ts",
       "accessCount": 4,
       "lastAccessed": 1778757321397,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\repository\\memberRepository.ts",
-      "accessCount": 4,
-      "lastAccessed": 1778757323851,
       "type": "file"
     },
     {
@@ -393,6 +393,18 @@
       "type": "file"
     },
     {
+      "path": "modules\\hr\\actions\\memberActions.ts",
+      "accessCount": 4,
+      "lastAccessed": 1778948124956,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberFilters.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1778949112551,
+      "type": "file"
+    },
+    {
       "path": "app\\(dashboard)\\admin\\references\\page.tsx",
       "accessCount": 3,
       "lastAccessed": 1778777845573,
@@ -411,12 +423,6 @@
       "type": "file"
     },
     {
-      "path": "modules\\hr\\actions\\memberActions.ts",
-      "accessCount": 2,
-      "lastAccessed": 1778757028499,
-      "type": "file"
-    },
-    {
       "path": "modules",
       "accessCount": 2,
       "lastAccessed": 1778757461212,
@@ -432,12 +438,6 @@
       "path": "modules\\hr\\components\\AddMemberDialog.tsx",
       "accessCount": 2,
       "lastAccessed": 1778777216314,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\components\\MemberFilters.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1778777850104,
       "type": "file"
     },
     {
