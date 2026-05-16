@@ -8,6 +8,7 @@ import { MemberEditDialog } from '@/modules/hr/components/MemberEditDialog'
 import { getKspzTableByStatus } from '@/modules/knowledge/repository/kspzTableRepository'
 import { getCoverageForMember } from '@/modules/knowledge/repository/kspzCoverageRepository'
 import { MemberProfileTabsClient } from '@/modules/hr/components/MemberProfileTabsClient'
+import { DeleteMemberButton } from '@/modules/hr/components/DeleteMemberButton'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -57,7 +58,12 @@ export default async function MemberProfilePage({ params }: PageProps) {
               </div>
             </div>
           </div>
-          {canEdit && <MemberEditDialog member={member} mentors={mentors} />}
+          {canEdit && (
+            <div className="flex items-center gap-2">
+              <DeleteMemberButton memberId={member.id} />
+              <MemberEditDialog member={member} mentors={mentors} />
+            </div>
+          )}
         </div>
       </div>
 

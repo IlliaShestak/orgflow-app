@@ -58,7 +58,24 @@ export async function updateMember(input: MemberUpdateInput) {
 export async function deleteMember(id: string) {
   try {
     await requireRole('Admin', 'VP4HR')
-    await prisma.member.delete({ where: { id } })
+
+    const member = await prisma.member.findUnique({ where: { id }, select: { userId: true } })
+
+    await prisma.$transaction([
+      // Unlink mentees (keep them, just clear the mentor reference)
+      prisma.member.updateMany({ where: { mentorId: id }, data: { mentorId: null } }),
+      prisma.teamMembership.deleteMany({ where: { memberId: id } }),
+      prisma.activityAttendance.deleteMany({ where: { memberId: id } }),
+      prisma.knowledgeCoverage.deleteMany({ where: { memberId: id } }),
+      prisma.applicationHistory.deleteMany({ where: { memberId: id } }),
+      prisma.member.delete({ where: { id } }),
+    ])
+
+    // Delete linked user account after member is gone
+    if (member?.userId) {
+      await prisma.user.delete({ where: { id: member.userId } })
+    }
+
     revalidatePath('/information-book')
     return { success: true }
   } catch (error) {
