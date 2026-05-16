@@ -44,7 +44,7 @@ export async function getActivityById(id: string) {
       },
       attendance: {
         include: {
-          member: { select: { id: true, firstName: true, lastName: true } },
+          member: { select: { id: true, firstName: true, lastName: true, status: true, state: true, joinedAt: true } },
         },
         orderBy: { createdAt: 'asc' },
       },

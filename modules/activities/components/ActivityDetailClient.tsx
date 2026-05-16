@@ -61,6 +61,7 @@ const typeLabels: Record<ActivityType, string> = {
   Gathering: 'Gathering',
   SIT: 'SIT',
   LeisureEvent: 'Leisure Event',
+  ThursdayMeeting: 'Четвергові збори',
 }
 
 function toDateInputValue(date: Date): string {

@@ -45,9 +45,10 @@ enum TeamType {
 }
 
 enum ActivityType {
-  Gathering     @map("gathering")
-  SIT           @map("sit")
-  LeisureEvent  @map("leisure_event")
+  Gathering       @map("gathering")
+  SIT             @map("sit")
+  LeisureEvent    @map("leisure_event")
+  ThursdayMeeting @map("thursday_meeting")
   @@map("activity_type")
 }
 

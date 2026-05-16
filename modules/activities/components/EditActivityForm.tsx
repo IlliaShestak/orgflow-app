@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ActivityType } from '@prisma/client'
 import { AgendaEditor, type DraftItem } from './AgendaEditor'
-import { AttendancePanel } from './AttendancePanel'
+import { AttendanceTable } from './AttendanceTable'
 import { updateActivity, saveAgenda } from '../actions/activityActions'
 
 interface KnowledgeTopic {
@@ -27,16 +27,13 @@ interface AgendaItemData {
   knowledgeTopic: { id: string; name: string; knowledgeTable: { name: string } } | null
 }
 
-interface AttendanceData {
-  id: string
-  memberId: string
-  member: { id: string; firstName: string; lastName: string }
-}
-
 interface MemberOption {
   id: string
   firstName: string
   lastName: string
+  status: 'Observer' | 'Baby' | 'Full' | 'Alumni'
+  state: 'Active' | 'Inactive'
+  joinedAt: Date | string
 }
 
 interface EditActivityFormProps {
@@ -49,14 +46,16 @@ interface EditActivityFormProps {
     agendaItems: AgendaItemData[]
   }
   availableTopics: KnowledgeTopic[]
-  attendance: AttendanceData[]
-  availableMembers: MemberOption[]
+  members: MemberOption[]
+  initialAttendeeIds: string[]
+  hasKnowledgeTopics: boolean
 }
 
 const typeLabels: Record<ActivityType, string> = {
   Gathering: 'Gathering',
   SIT: 'SIT',
   LeisureEvent: 'Leisure Event',
+  ThursdayMeeting: 'Четвергові збори',
 }
 
 function toDateInputValue(date: Date): string {
@@ -70,8 +69,9 @@ function toDateInputValue(date: Date): string {
 export function EditActivityForm({
   activity,
   availableTopics,
-  attendance,
-  availableMembers,
+  members,
+  initialAttendeeIds,
+  hasKnowledgeTopics,
 }: EditActivityFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -238,15 +238,13 @@ export function EditActivityForm({
       <div className="bg-white border border-gray-100 rounded-[10px] overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <p className="text-[13px] font-semibold text-gray-800">{'Відвідуваність'}</p>
-          <p className="text-[11px] text-gray-400 mt-0.5">
-            {attendance.length} {'з'} {availableMembers.length} {'присутніх'}
-          </p>
         </div>
         <div className="p-5">
-          <AttendancePanel
+          <AttendanceTable
             activityId={activity.id}
-            attendance={attendance}
-            availableMembers={availableMembers}
+            members={members}
+            initialAttendeeIds={initialAttendeeIds}
+            hasKnowledgeTopics={hasKnowledgeTopics}
           />
         </div>
       </div>

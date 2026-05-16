@@ -32,6 +32,7 @@ const typeLabels: Record<ActivityType, string> = {
   Gathering: 'Gathering',
   SIT: 'SIT',
   LeisureEvent: 'Leisure Event',
+  ThursdayMeeting: 'Четвергові збори',
 }
 
 export function AddActivityDialog({ availableTopics, availableMembers }: AddActivityDialogProps) {

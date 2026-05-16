@@ -23,10 +23,13 @@ export default async function EditActivityPage({ params }: { params: Promise<{ i
       orderBy: [{ knowledgeTable: { name: 'asc' } }, { order: 'asc' }],
     }),
     prisma.member.findMany({
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, status: true, state: true, joinedAt: true },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     }),
   ])
+
+  const initialAttendeeIds = activity.attendance.map((a) => a.memberId)
+  const hasKnowledgeTopics = activity.agendaItems.some((item) => item.knowledgeTopicId !== null)
 
   return (
     <div className="p-8">
@@ -43,8 +46,9 @@ export default async function EditActivityPage({ params }: { params: Promise<{ i
         <EditActivityForm
           activity={activity as Parameters<typeof EditActivityForm>[0]['activity']}
           availableTopics={allTopics}
-          attendance={activity.attendance}
-          availableMembers={allMembers}
+          members={allMembers}
+          initialAttendeeIds={initialAttendeeIds}
+          hasKnowledgeTopics={hasKnowledgeTopics}
         />
       </div>
     </div>

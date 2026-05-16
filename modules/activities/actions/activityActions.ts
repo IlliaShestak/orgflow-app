@@ -40,20 +40,6 @@ export async function createActivity(input: ActivityCreateInput) {
         await tx.activityAttendance.createMany({
           data: memberIds.map((memberId) => ({ activityId: act.id, memberId })),
         })
-
-        const topicIds = agendaItems
-          .filter((i): i is { kind: 'topic'; knowledgeTopicId: string } => i.kind === 'topic')
-          .map((i) => i.knowledgeTopicId)
-
-        for (const memberId of memberIds) {
-          for (const knowledgeTopicId of topicIds) {
-            await tx.knowledgeCoverage.upsert({
-              where: { knowledge_coverage_unique: { memberId, knowledgeTopicId } },
-              create: { memberId, knowledgeTopicId, sourceActivityId: act.id },
-              update: {},
-            })
-          }
-        }
       }
 
       return act
@@ -141,20 +127,6 @@ export async function markAttendance(input: MarkAttendanceInput) {
       update: {},
     })
 
-    const agendaItems = await prisma.activityAgendaItem.findMany({
-      where: { activityId, knowledgeTopicId: { not: null } },
-      select: { knowledgeTopicId: true },
-    })
-
-    for (const item of agendaItems) {
-      if (!item.knowledgeTopicId) continue
-      await prisma.knowledgeCoverage.upsert({
-        where: { knowledge_coverage_unique: { memberId, knowledgeTopicId: item.knowledgeTopicId } },
-        create: { memberId, knowledgeTopicId: item.knowledgeTopicId, sourceActivityId: activityId },
-        update: {},
-      })
-    }
-
     revalidatePath(`/activities/${activityId}`)
     return { success: true }
   } catch (error) {
@@ -186,5 +158,48 @@ export async function removeAttendance(input: { activityId: string; memberId: st
     return { success: true }
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Помилка видалення відвідуваності' }
+  }
+}
+
+export async function syncCoverageForActivity(activityId: string) {
+  try {
+    const session = await getSession()
+    if (!session?.user) throw new Error('Unauthorized')
+
+    const activity = await prisma.activity.findUnique({
+      where: { id: activityId },
+      select: {
+        agendaItems: {
+          where: { knowledgeTopicId: { not: null } },
+          select: { knowledgeTopicId: true },
+        },
+        attendance: { select: { memberId: true } },
+      },
+    })
+
+    if (!activity) return { success: true }
+
+    const topicIds = activity.agendaItems
+      .map((i) => i.knowledgeTopicId)
+      .filter((id): id is string => id !== null)
+    const memberIds = activity.attendance.map((a) => a.memberId)
+
+    if (!topicIds.length || !memberIds.length) return { success: true }
+
+    await Promise.all(
+      memberIds.flatMap((memberId) =>
+        topicIds.map((knowledgeTopicId) =>
+          prisma.knowledgeCoverage.upsert({
+            where: { knowledge_coverage_unique: { memberId, knowledgeTopicId } },
+            create: { memberId, knowledgeTopicId, sourceActivityId: activityId },
+            update: {},
+          })
+        )
+      )
+    )
+
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка синхронізації покриття' }
   }
 }
