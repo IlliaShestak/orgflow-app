@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
-import { getMemberById, getMembersForMentorSelect } from '@/modules/hr/repository/memberRepository'
+import { getMemberById, getMembersForMentorSelect, getMemberByUserId } from '@/modules/hr/repository/memberRepository'
 import { StatusBadge } from '@/shared/components/StatusBadge'
 import { StateBadge } from '@/shared/components/StateBadge'
 import { MemberAvatar } from '@/shared/components/MemberAvatar'
@@ -37,6 +37,14 @@ export default async function MemberProfilePage({ params }: PageProps) {
   const role = session.user.role
   const canEdit = role === 'Admin' || role === 'VP4HR'
 
+  let canManageHistory = canEdit
+  if (role === 'FullMember') {
+    const self = await getMemberByUserId(session.user.id)
+    if (self) {
+      canManageHistory = self.id === id || self.mentees.some((m: { id: string }) => m.id === id)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white border border-gray-100 rounded-[10px] p-6">
@@ -72,6 +80,7 @@ export default async function MemberProfilePage({ params }: PageProps) {
         kspzTable={kspzTable}
         memberCoverage={memberCoverage}
         canEdit={canEdit}
+        canManageHistory={canManageHistory}
       />
     </div>
   )

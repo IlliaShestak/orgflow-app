@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/shared/lib/auth'
 import { prisma } from '@/shared/lib/prisma'
-import { memberCreateSchema, memberUpdateSchema, MemberCreateInput, MemberUpdateInput } from '../validators/memberSchema'
+import {
+  memberCreateSchema, memberUpdateSchema, MemberCreateInput, MemberUpdateInput,
+  appHistoryCreateSchema, appHistoryUpdateSchema, AppHistoryCreateInput, AppHistoryUpdateInput,
+} from '../validators/memberSchema'
 
 export async function createMember(input: MemberCreateInput) {
   try {
@@ -52,6 +55,54 @@ export async function updateMember(input: MemberUpdateInput) {
     return { success: true, data: member }
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Помилка оновлення учасника' }
+  }
+}
+
+async function requireHistoryAccess(memberId: string) {
+  const session = await import('@/shared/lib/auth').then(m => m.getSession())
+  if (!session?.user) throw new Error('Unauthorized')
+  const role = session.user.role as string
+  if (role === 'Admin' || role === 'VP4HR') return
+  if (role === 'FullMember') {
+    const { getMemberByUserId } = await import('../repository/memberRepository')
+    const self = await getMemberByUserId(session.user.id)
+    if (self && (self.id === memberId || self.mentees.some((m: { id: string }) => m.id === memberId))) return
+  }
+  throw new Error('Unauthorized')
+}
+
+export async function createApplicationHistory(input: AppHistoryCreateInput) {
+  try {
+    const data = appHistoryCreateSchema.parse(input)
+    await requireHistoryAccess(data.memberId)
+    const record = await prisma.applicationHistory.create({ data })
+    revalidatePath(`/information-book/${data.memberId}`)
+    return { success: true, data: record }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка створення запису' }
+  }
+}
+
+export async function updateApplicationHistory(input: AppHistoryUpdateInput) {
+  try {
+    const { id, memberId, ...data } = appHistoryUpdateSchema.parse(input)
+    await requireHistoryAccess(memberId)
+    const record = await prisma.applicationHistory.update({ where: { id }, data })
+    revalidatePath(`/information-book/${memberId}`)
+    return { success: true, data: record }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка оновлення запису' }
+  }
+}
+
+export async function deleteApplicationHistory(id: string, memberId: string) {
+  try {
+    await requireHistoryAccess(memberId)
+    await prisma.applicationHistory.delete({ where: { id } })
+    revalidatePath(`/information-book/${memberId}`)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Помилка видалення запису' }
   }
 }
 
