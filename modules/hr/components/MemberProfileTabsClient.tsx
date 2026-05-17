@@ -193,7 +193,13 @@ export function MemberProfileTabsClient({
   canManageHistory,
 }: MemberProfileTabsClientProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('info')
-  const [records, setRecords] = useState<AppHistory[]>(member.applicationHistory)
+  function sortRecords(arr: AppHistory[]): AppHistory[] {
+    return [...arr].sort((a, b) =>
+      new Date(b.appliedAt as string).getTime() - new Date(a.appliedAt as string).getTime()
+    )
+  }
+
+  const [records, setRecords] = useState<AppHistory[]>(() => sortRecords(member.applicationHistory))
   const [adding, setAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [historyError, setHistoryError] = useState<string | null>(null)
@@ -210,7 +216,7 @@ export function MemberProfileTabsClient({
         result: data.result,
       })
       if (!res.success) { setHistoryError(res.error ?? 'Помилка'); return }
-      if (res.data) setRecords((prev) => [...prev, res.data!])
+      if (res.data) setRecords((prev) => sortRecords([...prev, res.data!]))
       setAdding(false)
     })
   }
@@ -227,7 +233,7 @@ export function MemberProfileTabsClient({
         result: data.result,
       })
       if (!res.success) { setHistoryError(res.error ?? 'Помилка'); return }
-      if (res.data) setRecords((prev) => prev.map((r) => r.id === id ? res.data! : r))
+      if (res.data) setRecords((prev) => sortRecords(prev.map((r) => r.id === id ? res.data! : r)))
       setEditingId(null)
     })
   }
@@ -398,7 +404,7 @@ export function MemberProfileTabsClient({
                       />
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
                       <div>
                         <p className="text-[13px] font-medium text-gray-800">{app.positionName}</p>
                         {app.teamName && <p className="text-[11px] text-gray-400">{app.teamName}</p>}
