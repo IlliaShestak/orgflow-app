@@ -1,6 +1,16 @@
 import { prisma } from '@/shared/lib/prisma'
 import { ActivityType } from '@prisma/client'
 
+export async function getUpcomingActivities() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return prisma.activity.findMany({
+    where: { date: { gte: today } },
+    select: { id: true, name: true, type: true, date: true },
+    orderBy: { date: 'asc' },
+  })
+}
+
 export async function getActivities(filters: { type?: ActivityType; search?: string } = {}) {
   const { type, search } = filters
   return prisma.activity.findMany({

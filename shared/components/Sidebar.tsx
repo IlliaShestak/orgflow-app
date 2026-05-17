@@ -7,9 +7,11 @@ import { cn } from '@/shared/lib/utils'
 interface NavItem {
   href: string
   label: string
+  exact?: boolean
 }
 
 const navItems: NavItem[] = [
+  { href: '/', label: 'Головна', exact: true },
   { href: '/information-book', label: 'Information book' },
   { href: '/teams', label: 'Команди' },
   { href: '/activities', label: 'Заходи' },
@@ -42,7 +44,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
           Навігація
         </p>
         {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href)
+          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           return (
             <Link
               key={item.href}
