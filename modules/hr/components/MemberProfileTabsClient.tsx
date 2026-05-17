@@ -78,8 +78,7 @@ function AppHistoryForm({
           <input
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
-            placeholder="Назва команди"
-            required
+            placeholder="Назва команди (необов'язково)"
             className="w-full border border-gray-200 rounded-[7px] px-2.5 py-1.5 text-[12px] text-gray-800 focus:outline-none focus:border-[#E85D04] transition-colors"
           />
         </div>
@@ -114,7 +113,7 @@ function AppHistoryForm({
                 result === 'Fail' ? 'bg-red-50 text-red-500' : 'bg-white text-gray-400 hover:bg-gray-50'
               }`}
             >
-              {'Не пройшов'}
+              {'Неуспішно'}
             </button>
           </div>
         </div>
@@ -402,7 +401,7 @@ export function MemberProfileTabsClient({
                     <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                       <div>
                         <p className="text-[13px] font-medium text-gray-800">{app.positionName}</p>
-                        <p className="text-[11px] text-gray-400">{app.teamName}</p>
+                        {app.teamName && <p className="text-[11px] text-gray-400">{app.teamName}</p>}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-[12px] text-gray-500">{fmt(app.appliedAt)}</span>

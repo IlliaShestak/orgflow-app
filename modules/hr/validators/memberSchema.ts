@@ -28,7 +28,7 @@ export type MemberUpdateInput = z.infer<typeof memberUpdateSchema>
 export const appHistoryCreateSchema = z.object({
   memberId: z.string().min(1),
   positionName: z.string().min(1, "Назва позиції є обов'язковою"),
-  teamName: z.string().min(1, "Назва команди є обов'язковою"),
+  teamName: z.string().default(''),
   appliedAt: z.coerce.date(),
   result: z.enum(['Success', 'Fail']),
 })
@@ -37,7 +37,7 @@ export const appHistoryUpdateSchema = z.object({
   id: z.string().min(1),
   memberId: z.string().min(1),
   positionName: z.string().min(1, "Назва позиції є обов'язковою"),
-  teamName: z.string().min(1, "Назва команди є обов'язковою"),
+  teamName: z.string().default(''),
   appliedAt: z.coerce.date(),
   result: z.enum(['Success', 'Fail']),
 })
