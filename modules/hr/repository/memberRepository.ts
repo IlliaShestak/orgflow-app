@@ -54,7 +54,7 @@ export async function getMemberById(id: string) {
       teamMemberships: {
         include: {
           position: {
-            include: { team: { select: { id: true, name: true, type: true } } },
+            include: { team: { select: { id: true, name: true, type: true, isArchived: true } } },
           },
         },
         orderBy: { startDate: 'desc' },
@@ -86,7 +86,7 @@ export async function getMemberByUserId(userId: string) {
       teamMemberships: {
         include: {
           position: {
-            include: { team: { select: { id: true, name: true, type: true } } },
+            include: { team: { select: { id: true, name: true, type: true, isArchived: true } } },
           },
         },
         orderBy: { startDate: 'desc' },

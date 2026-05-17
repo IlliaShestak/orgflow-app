@@ -14,7 +14,7 @@ type TeamMembership = {
   id: string
   startDate: DateLike
   endDate: DateLike
-  position: { name: string; team: { name: string; type: string } }
+  position: { name: string; team: { name: string; type: string; isArchived: boolean } }
 }
 
 type AppHistory = {
@@ -49,7 +49,7 @@ interface ProfileTabsClientProps {
 
 const TABS = [
   { key: 'info', label: 'Загальна інформація' },
-  { key: 'teams', label: 'Команди' },
+  { key: 'teams', label: 'Активні посади' },
   { key: 'kspz', label: 'КСПЗ' },
   { key: 'history', label: 'Історія подач' },
 ] as const
@@ -289,31 +289,31 @@ export function ProfileTabsClient({ member, kspzTable, memberCoverage, canEdit }
 
       {activeTab === 'teams' && (
         <div className="bg-white border border-gray-100 rounded-[10px] p-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-4">{'Команди'}</h2>
-          {member.teamMemberships.length === 0 ? (
-            <p className="text-sm text-gray-400">{'Не є учасником жодної команди'}</p>
-          ) : (
-            <div className="space-y-3">
-              {member.teamMemberships.map((tm) => (
-                <div key={tm.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p className="text-[13px] font-medium text-gray-800">
-                      {tm.position.team.name} — {tm.position.name}
-                    </p>
-                    <p className="text-[11px] text-gray-400">{tm.position.team.type}</p>
+          <h2 className="text-sm font-semibold text-gray-800 mb-4">{'Активні посади'}</h2>
+          {(() => {
+            const active = member.teamMemberships.filter(
+              (tm) => !tm.endDate && !tm.position.team.isArchived
+            )
+            return active.length === 0 ? (
+              <p className="text-sm text-gray-400">{'Немає активних посад'}</p>
+            ) : (
+              <div className="space-y-3">
+                {active.map((tm) => (
+                  <div key={tm.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div>
+                      <p className="text-[13px] font-medium text-gray-800">{tm.position.name}</p>
+                      <p className="text-[11px] text-gray-400">
+                        {tm.position.team.name}
+                        <span className="ml-1.5 text-gray-300">·</span>
+                        <span className="ml-1.5">{tm.position.team.type}</span>
+                      </p>
+                    </div>
+                    <p className="text-[12px] text-gray-500">{'з'} {fmt(tm.startDate)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[12px] text-gray-500">{fmt(tm.startDate)}</p>
-                    {tm.endDate ? (
-                      <p className="text-[11px] text-gray-400">— {fmt(tm.endDate)}</p>
-                    ) : (
-                      <span className="text-[11px] text-[#0B7B45] font-medium">{'Активний'}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )
+          })()}
         </div>
       )}
 
