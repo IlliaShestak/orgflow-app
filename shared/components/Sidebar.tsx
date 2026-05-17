@@ -11,7 +11,6 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Головна', exact: true },
   { href: '/information-book', label: 'Information book' },
   { href: '/teams', label: 'Команди' },
   { href: '/activities', label: 'Заходи' },
@@ -30,12 +29,12 @@ export function Sidebar({ role, userName }: SidebarProps) {
     <aside className="w-[220px] min-h-screen bg-[#1A1D2E] flex flex-col fixed left-0 top-0 bottom-0 z-30">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8">
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-[7px] bg-gradient-to-br from-[#E85D04] to-[#0A3D91] flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-xs">O</span>
           </div>
           <span className="text-white font-semibold text-[15px]">OrgFlow</span>
-        </div>
+        </Link>
       </div>
 
       {/* Nav */}

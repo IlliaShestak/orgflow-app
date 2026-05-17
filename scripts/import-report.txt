@@ -1,0 +1,92 @@
+Row 683 "Зоряна Мацько": invalid joinedAt "10/1/12" — row skipped
+Row 684 "Оксана Козловська": invalid joinedAt "10/1/12" — row skipped
+Row 685 "Андрій Сірук": invalid joinedAt "10/1/12" — row skipped
+Row 686 "Олена Томчук": invalid joinedAt "10/1/12" — row skipped
+Row 687 "Павло Білик": invalid joinedAt "10/1/12" — row skipped
+Row 688 "Оля Бура": invalid joinedAt "10/1/12" — row skipped
+Row 689 "Юра Панчишин": invalid joinedAt "10/1/12" — row skipped
+Row 690 "Богдан Рудка": invalid joinedAt "10/1/12" — row skipped
+Row 691 "Володимир Лісаковський": invalid joinedAt "3/3/11" — row skipped
+Row 692 "Женя Ужва": invalid joinedAt "10/1/11" — row skipped
+Row 693 "Іра Крук": invalid joinedAt "3/7/11" — row skipped
+Row 694 "Роксолана Ткачук": invalid joinedAt "3/5/11" — row skipped
+Row 695 "Романа Мосієвська": invalid joinedAt "10/1/11" — row skipped
+Row 696 "Женя Козар": invalid joinedAt "3/3/11" — row skipped
+Row 697 "Олег Козак": invalid joinedAt "10/1/11" — row skipped
+Row 698 "Христина Корж": invalid joinedAt "3/6/11" — row skipped
+Row 699 "Ляна Білоніжка": invalid joinedAt "3/3/11" — row skipped
+Row 700 "Руслан Вороняк": invalid joinedAt "9/30/10" — row skipped
+Row 707 "Іванка Кушнірук": invalid joinedAt "9/20/09" — row skipped
+Row 682 "Юра Бішко": mentor "Іванка Кушнірук" not found
+Row 678 "Тарас Вуїв": mentor "Руслан Вороняк" not found
+Row 679 "Марія Майор": mentor "Женя Козар" not found
+Row 680 "Наталя Дімітрієвич": mentor "Олег Козак" not found
+Row 681 "Юля Дарморез": mentor "Олег Козак" not found
+Row 671 "Дана Коханюк": mentor "Романа Мосієвська" not found
+Row 658 "Ігор Прощук": mentor "Богдан Рудка" not found
+Row 642 "Віка Андреєва": mentor "Андрій Сірук" not found
+Row 644 "Владислав Топала": mentor "Юра Панчишин" not found
+Row 645 "Данило Журавчак": mentor "Володимир Лісаковський" not found
+Row 590 "Ілона Копитинська": mentor "Володимир Лісаковський" not found
+Row 592 "Вова Гресько": mentor "Романа Мосієвська" not found
+Row 560 "Марта Капериз": mentor "Павло Білик" not found
+Row 672 "Наталя Антощук": mentor "Женя Козар" not found
+Row 673 "Ігор Гудима": mentor "Богдан Рудка" not found
+Row 674 "Оксана Камінецька": mentor "Роксолана Ткачук" not found
+Row 675 "Юлія Нікольська": mentor "Христина Корж" not found
+Row 677 "Євгеній Рогожніков": mentor "Іра Крук" not found
+Row 661 "Тарас Канчалаба": mentor "Андрій Сірук" not found
+Row 662 "Вероніка Паздей": mentor "Женя Ужва" not found
+Row 663 "Олег Руденко": mentor "Ляна Білоніжка" not found
+Row 665 "Людмила Хадай": mentor "Женя Козар" not found
+Row 666 "Оксана Шабаліна": mentor "Женя Козар" not found
+Row 667 "Олена Шерстнякова": mentor "Оксана Козловська" not found
+Row 668 "Андрій Чабанов": mentor "Володимир Лісаковський" not found
+Row 646 "Вікторія Котула": mentor "Ляна Білоніжка" not found
+Row 647 "Любомир Опанович": mentor "Оля Бура" not found
+Row 648 "Олександр Панчук": mentor "Олена Томчук" not found
+Row 649 "Аліна Попова": mentor "Андрій Сірук" not found
+Row 650 "Тамара Волошенко": mentor "Олег Козак" not found
+Row 651 "Анжела Дворкова": mentor "Володимир Лісаковський" not found
+Row 652 "Андрій Коник": mentor "Ляна Білоніжка" not found
+Row 653 "Інна Остапенко": mentor "Оксана Козловська" not found
+Row 655 "Людмила Рісна": mentor "Романа Мосієвська" not found
+Row 656 "Владислав Савіцький": mentor "Олег Козак" not found
+Row 623 "Юлія Чех": mentor "Зоряна Мацько" not found
+Row 625 "Наталя Волошенко": mentor "Олена Томчук" not found
+Row 627 "Ганна Кіцілінська": mentor "Андрій Сірук" not found
+Row 629 "Євгеній Біба": mentor "Володимир Лісаковський" not found
+Row 630 "Олена Бішко": mentor "Романа Мосієвська" not found
+Row 631 "Марія Борисовська": mentor "Оля Бура" not found
+Row 633 "Михайло Добош": mentor "Ляна Білоніжка" not found
+Row 634 "Оксана Козак": mentor "Олег Козак" not found
+Row 635 "Ірина Крот": mentor "Романа Мосієвська" not found
+Row 636 "Євгенія Могилка": mentor "Ляна Білоніжка" not found
+Row 637 "Анна Сергійчук": mentor "Романа Мосієвська" not found
+Row 638 "Олександр Чабанов": mentor "Ляна Білоніжка" not found
+Row 639 "Христина Черниш": mentor "Оля Бура" not found
+Row 641 "Олександра Білич": mentor "Володимир Лісаковський" not found
+Row 599 "Сергій Дмитрук": mentor "Романа Мосієвська" not found
+Row 600 "Богдан Мокряк": mentor "Оля Бура" not found
+Row 601 "Михайло Петелицький": mentor "Оля Бура" not found
+Row 603 "Назар Приведа": mentor "Олена Томчук" not found
+Row 606 "Нікіта Шенцев": mentor "Ляна Білоніжка" not found
+Row 612 "Олег Розквас": mentor "Зоряна Мацько" not found
+Row 613 "Марія Росол": mentor "Юра Панчишин" not found
+Row 616 "Василь Чучман": mentor "Романа Мосієвська" not found
+Row 618 "Анастасія Зикова": mentor "Оля Бура" not found
+Row 619 "Назар Кравчук": mentor "Олена Томчук" not found
+Row 564 "Люсіне Каладжян": mentor "Павло Білик" not found
+Row 569 "Анастасія Недогонова": mentor "Павло Білик" not found
+Row 581 "Ярослав Мельник": mentor "Володимир Лісаковський" not found
+Row 582 "Юрій Паньків": mentor "Павло Білик" not found
+Row 587 "Ілона Шевчук": mentor "Володимир Лісаковський" not found
+Row 558 "Сергій Кістечок": mentor "Павло Білик" not found
+"Максим Федоров" (Alumni): needs account but has no email — skipped
+"Роман Поляниця" (Alumni): needs account but has no email — skipped
+"Наталія Гур'янова" (Alumni): needs account but has no email — skipped
+"Зоряна Костинюк" (Alumni): needs account but has no email — skipped
+"Ростислав Сороковий" (Alumni): needs account but has no email — skipped
+"Денис Сорохан" (Alumni): needs account but has no email — skipped
+"Вікторія Рябовол" (Alumni): needs account but has no email — skipped
+"Крістіна Ловска" (Alumni): needs account but has no email — skipped

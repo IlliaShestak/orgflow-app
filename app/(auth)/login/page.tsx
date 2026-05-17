@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 
 export default async function LoginPage() {
   const session = await auth()
-  if (session) redirect('/information-book')
+  if (session) redirect('/')
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] flex items-center justify-center p-4">

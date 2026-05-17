@@ -220,14 +220,20 @@
   "hotPaths": [
     {
       "path": "",
-      "accessCount": 50,
-      "lastAccessed": 1778949008339,
+      "accessCount": 63,
+      "lastAccessed": 1779004117379,
       "type": "directory"
     },
     {
       "path": "prisma\\schema.prisma",
-      "accessCount": 20,
-      "lastAccessed": 1778946998759,
+      "accessCount": 28,
+      "lastAccessed": 1779001054002,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\information-book\\[id]\\page.tsx",
+      "accessCount": 22,
+      "lastAccessed": 1779001326114,
       "type": "file"
     },
     {
@@ -237,9 +243,21 @@
       "type": "file"
     },
     {
-      "path": "app\\(dashboard)\\information-book\\[id]\\page.tsx",
-      "accessCount": 19,
-      "lastAccessed": 1778948154363,
+      "path": "app\\(dashboard)\\activities\\[id]\\page.tsx",
+      "accessCount": 14,
+      "lastAccessed": 1778962101654,
+      "type": "file"
+    },
+    {
+      "path": "app\\(dashboard)\\information-book\\page.tsx",
+      "accessCount": 14,
+      "lastAccessed": 1778964707499,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\repository\\memberRepository.ts",
+      "accessCount": 14,
+      "lastAccessed": 1779003141711,
       "type": "file"
     },
     {
@@ -250,14 +268,14 @@
     },
     {
       "path": "modules\\teams\\actions\\updateTeam.ts",
-      "accessCount": 12,
-      "lastAccessed": 1778942862084,
+      "accessCount": 13,
+      "lastAccessed": 1778963764809,
       "type": "file"
     },
     {
-      "path": "app\\(dashboard)\\information-book\\page.tsx",
-      "accessCount": 11,
-      "lastAccessed": 1778949095005,
+      "path": "app\\(dashboard)\\activities\\page.tsx",
+      "accessCount": 12,
+      "lastAccessed": 1778962313468,
       "type": "file"
     },
     {
@@ -267,9 +285,9 @@
       "type": "file"
     },
     {
-      "path": "app\\(dashboard)\\activities\\[id]\\page.tsx",
-      "accessCount": 9,
-      "lastAccessed": 1778925504326,
+      "path": "modules\\activities\\repository\\activityRepository.ts",
+      "accessCount": 10,
+      "lastAccessed": 1779003843174,
       "type": "file"
     },
     {
@@ -279,27 +297,27 @@
       "type": "file"
     },
     {
+      "path": "modules\\activities\\validators\\activitySchema.ts",
+      "accessCount": 9,
+      "lastAccessed": 1778960410457,
+      "type": "file"
+    },
+    {
       "path": "modules\\admin\\repository\\adminRepository.ts",
       "accessCount": 8,
       "lastAccessed": 1778872258079,
       "type": "file"
     },
     {
-      "path": "app\\(dashboard)\\activities\\page.tsx",
+      "path": "modules\\activities\\components\\AttendancePanel.tsx",
       "accessCount": 8,
-      "lastAccessed": 1778877259503,
+      "lastAccessed": 1778960474856,
       "type": "file"
     },
     {
-      "path": "modules\\activities\\validators\\activitySchema.ts",
+      "path": "modules\\hr\\validators\\memberSchema.ts",
       "accessCount": 8,
-      "lastAccessed": 1778877387104,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\repository\\memberRepository.ts",
-      "accessCount": 8,
-      "lastAccessed": 1778949178097,
+      "lastAccessed": 1779001918736,
       "type": "file"
     },
     {
@@ -309,27 +327,27 @@
       "type": "file"
     },
     {
-      "path": "modules\\activities\\components\\AttendancePanel.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1778926154984,
+      "path": "shared\\components\\ConfirmDialog.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1778960455915,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\MemberFilters.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1778964841588,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\actions\\memberActions.ts",
+      "accessCount": 7,
+      "lastAccessed": 1779001290013,
       "type": "file"
     },
     {
       "path": "tsconfig.json",
       "accessCount": 6,
       "lastAccessed": 1778947199167,
-      "type": "file"
-    },
-    {
-      "path": "shared\\components\\ConfirmDialog.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1778948109957,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\validators\\memberSchema.ts",
-      "accessCount": 5,
-      "lastAccessed": 1778857298826,
       "type": "file"
     },
     {
@@ -357,9 +375,9 @@
       "type": "file"
     },
     {
-      "path": "modules\\activities\\repository\\activityRepository.ts",
+      "path": "modules\\teams\\actions\\managePositions.ts",
       "accessCount": 5,
-      "lastAccessed": 1778925267526,
+      "lastAccessed": 1778963766039,
       "type": "file"
     },
     {
@@ -387,24 +405,6 @@
       "type": "file"
     },
     {
-      "path": "modules\\teams\\actions\\managePositions.ts",
-      "accessCount": 4,
-      "lastAccessed": 1778940827099,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\actions\\memberActions.ts",
-      "accessCount": 4,
-      "lastAccessed": 1778948124956,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\components\\MemberFilters.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1778949112551,
-      "type": "file"
-    },
-    {
       "path": "app\\(dashboard)\\admin\\references\\page.tsx",
       "accessCount": 3,
       "lastAccessed": 1778777845573,
@@ -420,6 +420,12 @@
       "path": "app\\(dashboard)\\admin\\users\\page.tsx",
       "accessCount": 3,
       "lastAccessed": 1778860449084,
+      "type": "file"
+    },
+    {
+      "path": "modules\\hr\\components\\ViewToggle.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1778964678019,
       "type": "file"
     },
     {
@@ -486,12 +492,6 @@
       "path": "modules\\hr\\components\\MemberKanbanBoard.tsx",
       "accessCount": 1,
       "lastAccessed": 1778756925696,
-      "type": "file"
-    },
-    {
-      "path": "modules\\hr\\components\\ViewToggle.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1778756957130,
       "type": "file"
     },
     {
