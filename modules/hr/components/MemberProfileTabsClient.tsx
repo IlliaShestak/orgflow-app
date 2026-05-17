@@ -52,7 +52,7 @@ function AppHistoryForm({
     (initial?.result as 'Success' | 'Fail') ?? 'Success'
   )
 
-  const canSubmit = positionName.trim() && teamName.trim() && appliedAt
+  const canSubmit = positionName.trim() && appliedAt
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
