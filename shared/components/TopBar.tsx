@@ -16,10 +16,11 @@ const breadcrumbMap: Record<string, string> = {
 
 interface TopBarProps {
   role: string
+  userName: string
   actions?: React.ReactNode
 }
 
-export function TopBar({ role, actions }: TopBarProps) {
+export function TopBar({ role, userName, actions }: TopBarProps) {
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
   const currentSegment = segments[0] ?? ''
@@ -37,9 +38,14 @@ export function TopBar({ role, actions }: TopBarProps) {
         {role !== 'Admin' && (
           <Link
             href="/profile"
-            className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
+            className="flex items-center gap-2 px-2 py-1 rounded-[7px] hover:bg-gray-50 transition-colors"
           >
-            Профіль
+            <div className="w-6 h-6 rounded-full bg-[#E85D04] flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-[10px] font-semibold">
+                {userName.slice(0, 2).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-[12px] font-medium text-gray-700">{userName}</span>
           </Link>
         )}
         <button

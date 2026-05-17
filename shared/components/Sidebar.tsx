@@ -103,20 +103,6 @@ export function Sidebar({ role, userName }: SidebarProps) {
         )}
       </nav>
 
-      {/* User card */}
-      <div className="px-3 py-4 border-t border-white/8">
-        <div className="flex items-center gap-2.5 px-2 mb-3">
-          <div className="w-7 h-7 rounded-full bg-[#E85D04] flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-[11px] font-semibold">
-              {userName.slice(0, 2).toUpperCase()}
-            </span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-white/85 text-[12px] font-medium truncate">{userName}</p>
-            <p className="text-white/35 text-[10px] truncate">{role}</p>
-          </div>
-        </div>
-      </div>
     </aside>
   )
 }
