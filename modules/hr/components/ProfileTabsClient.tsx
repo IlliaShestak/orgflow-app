@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { MemberAvatar } from '@/shared/components/MemberAvatar'
 import { MemberKspzGrid } from '@/modules/knowledge/components/MemberKspzGrid'
+import { createApplicationHistory, updateApplicationHistory, deleteApplicationHistory } from '../actions/memberActions'
 import type { KspzTopic } from '@/modules/knowledge/types'
 
 // Dates arrive as strings at the RSC→client boundary
@@ -54,10 +55,17 @@ const TABS = [
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
+type FormData = { positionName: string; teamName: string; appliedAt: string; result: 'Success' | 'Fail' }
 
 function fmt(date: DateLike): string {
   if (!date) return '—'
   return new Date(date as string).toLocaleDateString('uk-UA')
+}
+
+function toDateInput(date: DateLike): string {
+  if (!date) return new Date().toISOString().split('T')[0]
+  const d = new Date(date as string)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
@@ -69,8 +77,166 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   )
 }
 
+function AppHistoryForm({
+  initial,
+  onSave,
+  onCancel,
+  isPending,
+}: {
+  initial?: AppHistory
+  onSave: (data: FormData) => void
+  onCancel: () => void
+  isPending: boolean
+}) {
+  const [positionName, setPositionName] = useState(initial?.positionName ?? '')
+  const [teamName, setTeamName] = useState(initial?.teamName ?? '')
+  const [appliedAt, setAppliedAt] = useState(toDateInput(initial?.appliedAt))
+  const [result, setResult] = useState<'Success' | 'Fail'>(
+    (initial?.result as 'Success' | 'Fail') ?? 'Success'
+  )
+
+  const canSubmit = positionName.trim() && appliedAt
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!canSubmit) return
+    onSave({ positionName: positionName.trim(), teamName: teamName.trim(), appliedAt, result })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-[#FAFBFD] border border-gray-100 rounded-[8px] p-4 space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="block text-[10px] text-gray-400">{'Позиція'}</label>
+          <input
+            value={positionName}
+            onChange={(e) => setPositionName(e.target.value)}
+            placeholder="Назва позиції"
+            required
+            className="w-full border border-gray-200 rounded-[7px] px-2.5 py-1.5 text-[12px] text-gray-800 focus:outline-none focus:border-[#E85D04] transition-colors"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-[10px] text-gray-400">{'Команда'}</label>
+          <input
+            value={teamName}
+            onChange={(e) => setTeamName(e.target.value)}
+            placeholder="Назва команди (необов'язково)"
+            className="w-full border border-gray-200 rounded-[7px] px-2.5 py-1.5 text-[12px] text-gray-800 focus:outline-none focus:border-[#E85D04] transition-colors"
+          />
+        </div>
+      </div>
+      <div className="flex items-end gap-3 flex-wrap">
+        <div className="space-y-1">
+          <label className="block text-[10px] text-gray-400">{'Дата подачі'}</label>
+          <input
+            type="date"
+            value={appliedAt}
+            onChange={(e) => setAppliedAt(e.target.value)}
+            required
+            className="border border-gray-200 rounded-[7px] px-2.5 py-1.5 text-[12px] text-gray-800 focus:outline-none focus:border-[#E85D04] transition-colors"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-[10px] text-gray-400">{'Результат'}</label>
+          <div className="flex rounded-[7px] overflow-hidden border border-gray-200">
+            <button
+              type="button"
+              onClick={() => setResult('Success')}
+              className={`px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                result === 'Success' ? 'bg-[#E6F5EE] text-[#0B7B45]' : 'bg-white text-gray-400 hover:bg-gray-50'
+              }`}
+            >
+              {'Успішно'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setResult('Fail')}
+              className={`px-3 py-1.5 text-[11px] font-medium border-l border-gray-200 transition-colors ${
+                result === 'Fail' ? 'bg-red-50 text-red-500' : 'bg-white text-gray-400 hover:bg-gray-50'
+              }`}
+            >
+              {'Неуспішно'}
+            </button>
+          </div>
+        </div>
+        <div className="flex gap-2 ml-auto">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-3 py-1.5 text-[11px] font-medium text-gray-600 border border-gray-200 rounded-[7px] hover:bg-gray-50 transition-colors"
+          >
+            {'Скасувати'}
+          </button>
+          <button
+            type="submit"
+            disabled={isPending || !canSubmit}
+            className="px-3 py-1.5 text-[11px] font-semibold text-white bg-[#E85D04] hover:bg-[#F4845F] rounded-[7px] disabled:opacity-50 transition-colors"
+          >
+            {isPending ? 'Збереження...' : 'Зберегти'}
+          </button>
+        </div>
+      </div>
+    </form>
+  )
+}
+
 export function ProfileTabsClient({ member, kspzTable, memberCoverage, canEdit }: ProfileTabsClientProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('info')
+
+  function sortRecords(arr: AppHistory[]): AppHistory[] {
+    return [...arr].sort((a, b) =>
+      new Date(b.appliedAt as string).getTime() - new Date(a.appliedAt as string).getTime()
+    )
+  }
+
+  const [records, setRecords] = useState<AppHistory[]>(() => sortRecords(member.applicationHistory))
+  const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [historyError, setHistoryError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  function handleAdd(data: FormData) {
+    setHistoryError(null)
+    startTransition(async () => {
+      const res = await createApplicationHistory({
+        memberId: member.id,
+        positionName: data.positionName,
+        teamName: data.teamName,
+        appliedAt: new Date(data.appliedAt),
+        result: data.result,
+      })
+      if (!res.success) { setHistoryError(res.error ?? 'Помилка'); return }
+      if (res.data) setRecords((prev) => sortRecords([...prev, res.data!]))
+      setAdding(false)
+    })
+  }
+
+  function handleEdit(id: string, data: FormData) {
+    setHistoryError(null)
+    startTransition(async () => {
+      const res = await updateApplicationHistory({
+        id,
+        memberId: member.id,
+        positionName: data.positionName,
+        teamName: data.teamName,
+        appliedAt: new Date(data.appliedAt),
+        result: data.result,
+      })
+      if (!res.success) { setHistoryError(res.error ?? 'Помилка'); return }
+      if (res.data) setRecords((prev) => sortRecords(prev.map((r) => r.id === id ? res.data! : r)))
+      setEditingId(null)
+    })
+  }
+
+  function handleDelete(id: string) {
+    setHistoryError(null)
+    startTransition(async () => {
+      const res = await deleteApplicationHistory(id, member.id)
+      if (!res.success) { setHistoryError(res.error ?? 'Помилка'); return }
+      setRecords((prev) => prev.filter((r) => r.id !== id))
+    })
+  }
 
   return (
     <>
@@ -177,28 +343,80 @@ export function ProfileTabsClient({ member, kspzTable, memberCoverage, canEdit }
 
       {activeTab === 'history' && (
         <div className="bg-white border border-gray-100 rounded-[10px] p-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-4">{'Історія подач'}</h2>
-          {member.applicationHistory.length === 0 ? (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-800">{'Історія подач'}</h2>
+            {!adding && (
+              <button
+                onClick={() => { setAdding(true); setEditingId(null) }}
+                className="px-3 py-1.5 text-[11px] font-medium text-[#E85D04] border border-[#E85D04] rounded-[7px] hover:bg-[#FDF0E8] transition-colors"
+              >
+                {'+ Додати запис'}
+              </button>
+            )}
+          </div>
+
+          {adding && (
+            <div className="mb-4">
+              <AppHistoryForm
+                onSave={handleAdd}
+                onCancel={() => setAdding(false)}
+                isPending={isPending}
+              />
+            </div>
+          )}
+
+          {historyError && <p className="text-xs text-red-500 mb-3">{historyError}</p>}
+
+          {records.length === 0 && !adding ? (
             <p className="text-sm text-gray-400">{'Немає записів про подачі'}</p>
           ) : (
-            <div className="space-y-3">
-              {member.applicationHistory.map((app) => (
-                <div key={app.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p className="text-[13px] font-medium text-gray-800">{app.positionName}</p>
-                    <p className="text-[11px] text-gray-400">{app.teamName}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[12px] text-gray-500">{fmt(app.appliedAt)}</span>
-                    <span
-                      className={[
-                        'text-[11px] font-medium px-2 py-0.5 rounded-full',
-                        app.result === 'Success' ? 'bg-[#E6F5EE] text-[#0B7B45]' : 'bg-red-50 text-red-500',
-                      ].join(' ')}
-                    >
-                      {app.result === 'Success' ? 'Успішно' : 'Не пройшов'}
-                    </span>
-                  </div>
+            <div className="space-y-1">
+              {records.map((app) => (
+                <div key={app.id}>
+                  {editingId === app.id ? (
+                    <div className="py-1">
+                      <AppHistoryForm
+                        initial={app}
+                        onSave={(data) => handleEdit(app.id, data)}
+                        onCancel={() => setEditingId(null)}
+                        isPending={isPending}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
+                      <div>
+                        <p className="text-[13px] font-medium text-gray-800">{app.positionName}</p>
+                        {app.teamName && <p className="text-[11px] text-gray-400">{app.teamName}</p>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[12px] text-gray-500">{fmt(app.appliedAt)}</span>
+                        <span
+                          className={[
+                            'text-[11px] font-medium px-2 py-0.5 rounded-full',
+                            app.result === 'Success' ? 'bg-[#E6F5EE] text-[#0B7B45]' : 'bg-red-50 text-red-500',
+                          ].join(' ')}
+                        >
+                          {app.result === 'Success' ? 'Успішно' : 'Неуспішно'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => { setEditingId(app.id); setAdding(false) }}
+                            disabled={isPending}
+                            className="text-[11px] text-gray-400 hover:text-[#E85D04] transition-colors disabled:opacity-50"
+                          >
+                            {'Ред.'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(app.id)}
+                            disabled={isPending}
+                            className="text-[11px] text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                          >
+                            {'Видалити'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
